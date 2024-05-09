@@ -1,0 +1,122 @@
+/*---------VARIABLES---------*/
+:root {
+  --primary: #8a98ff;
+  --font: #0C0C0C;
+  --fontBox: #353535;
+  --text: white;
+}
+/*----------GENERAL----------*/
+html,body {
+  background-color: var(--font);
+  color: var(--primary);
+}
+.main {
+  padding:0;
+}
+
+/*----------MESSAGES----------*/
+.message.error {
+  color:red;
+}
+.message.success {
+  color: green;
+}
+.message.info {
+  color:blue;
+}
+
+/*----------------------------*/
+
+.btn-primary {
+  background-color: var(--primary);
+  border:0;
+  border-radius: 15px;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background-color: var(--primary);
+  opacity:0.8;
+}
+.text-primary,.card i,.card a {
+  color: var(--primary) !important;
+}
+.box-comments {
+  color: var(--primary);
+}
+.icon-primary {
+  color: var(--primary);
+  font-size: 35pt;
+  padding-right: 15px;
+}
+.form-control,.form-control:focus {
+  border-radius: 15px;
+  background-color: var(--fontBox);
+  color: var(--text);
+}
+.card {
+  background-color: var(--fontBox);
+  color: var(--text);
+}
+.box-search {
+  width: 25%;
+}
+.comment-reply {
+  padding-left: 20px;
+}
+
+@media screen and (max-width: 700px){
+  .icon-comment {
+    display:none;
+  }
+  .icon-primary {
+    font-size: 15pt;
+  }
+  .box-search {
+    width: 100%;
+  }
+  .comment-reply {
+    padding-left: 8px;
+  }
+}
+
+/*------------LOADER----------*/
+.page-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    background-color: var(--font);
+}
+.page-overlay .content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.loader {
+  width: 50px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 8px solid var(--fontBox);
+  animation:
+    l20-1 0.8s infinite linear alternate,
+    l20-2 1.6s infinite linear;
+}
+@keyframes l20-1{
+   0%    {clip-path: polygon(50% 50%,0       0,  50%   0%,  50%    0%, 50%    0%, 50%    0%, 50%    0% )}
+   12.5% {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100%   0%, 100%   0%, 100%   0% )}
+   25%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 100% 100%, 100% 100% )}
+   50%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
+   62.5% {clip-path: polygon(50% 50%,100%    0, 100%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
+   75%   {clip-path: polygon(50% 50%,100% 100%, 100% 100%,  100% 100%, 100% 100%, 50%  100%, 0%   100% )}
+   100%  {clip-path: polygon(50% 50%,50%  100%,  50% 100%,   50% 100%,  50% 100%, 50%  100%, 0%   100% )}
+}
+@keyframes l20-2{ 
+  0%    {transform:scaleY(1)  rotate(0deg)}
+  49.99%{transform:scaleY(1)  rotate(135deg)}
+  50%   {transform:scaleY(-1) rotate(0deg)}
+  100%  {transform:scaleY(-1) rotate(-135deg)}
+}
