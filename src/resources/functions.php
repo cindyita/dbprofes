@@ -5,18 +5,18 @@
  * with a default value returned if the key is not found or the value is empty.
  * 
  * @param $key The `` parameter in the `getSessionItem` function is used to specify the key of the
- * item you want to retrieve from the `['MYSESSION']` array.
+ * item you want to retrieve from the `['PSESSION']` array.
  * @param $def The `` parameter in the `getSessionItem` function is the default value that will be
  * returned if the session item with the specified key is not set or is empty. If the session item is
  * not found or is empty, the function will return the default value provided in the `` parameter
  * 
  * @return -The function `getSessionItem` is returning the value stored in
- * `['MYSESSION'][]` if it exists and is not empty. If the value does not exist or is
+ * `['PSESSION'][]` if it exists and is not empty. If the value does not exist or is
  * empty, it will return the default value ``.
  */
 function getSessionItem($key, $def) {
-    if (isset($_SESSION['MYSESSION']) && isset($_SESSION['MYSESSION'][$key]) && !empty($_SESSION['MYSESSION'][$key]) ) {
-        return $_SESSION['MYSESSION'][$key];
+    if (isset($_SESSION['PSESSION']) && isset($_SESSION['PSESSION'][$key]) && !empty($_SESSION['PSESSION'][$key]) ) {
+        return $_SESSION['PSESSION'][$key];
     }
     return $def;
 }

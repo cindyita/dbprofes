@@ -24,11 +24,11 @@ class AuthController
 
                     foreach ($row as $key => $value) {
                         if($key != "password"){
-                            $_SESSION['MYSESSION'][$key] = $value;
+                            $_SESSION['PSESSION'][$key] = $value;
                         }
                     }
                     $id = $row['id'];
-                    $_SESSION['MYSESSION']['userid'] = $id;
+                    $_SESSION['PSESSION']['userid'] = $id;
 
                     $token = self::generateToken($id);
 
@@ -125,7 +125,7 @@ class AuthController
     }
 
     public static function logout() {
-        unset($_SESSION['MYSESSION']);
+        unset($_SESSION['PSESSION']);
         setcookie("AuthToken", "", time() - 3600, '/');
         session_destroy();
         redirect('login');

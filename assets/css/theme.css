@@ -12,6 +12,10 @@ html,body {
 }
 .main {
   padding:0;
+  min-height: 85vh;
+}
+a {
+  color: var(--primary);
 }
 
 /*----------MESSAGES----------*/
@@ -48,20 +52,35 @@ html,body {
   font-size: 35pt;
   padding-right: 15px;
 }
-.form-control,.form-control:focus {
+.form-control,.form-control:focus,
+.form-select, .form-select:focus {
   border-radius: 15px;
   background-color: var(--fontBox);
   color: var(--text);
+}
+.form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
 }
 .card {
   background-color: var(--fontBox);
   color: var(--text);
 }
-.box-search {
+.box-search,.box-form {
   width: 25%;
 }
 .comment-reply {
-  padding-left: 20px;
+  padding-left: 50px;
+}
+.menu i {
+  font-size: 20px;
+  color: var(--primary);
+}
+.menu a:hover i {
+  opacity:0.8;
+}
+.line {
+  border-bottom: 1px solid grey;
+  width: 100%;
 }
 
 @media screen and (max-width: 700px){
@@ -71,13 +90,14 @@ html,body {
   .icon-primary {
     font-size: 15pt;
   }
-  .box-search {
+  .box-search,.box-form {
     width: 100%;
   }
   .comment-reply {
     padding-left: 8px;
   }
 }
+
 
 /*------------LOADER----------*/
 .page-overlay {

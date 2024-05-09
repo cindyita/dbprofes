@@ -18,6 +18,7 @@ $router->get('/home', 'PagesController@home');
 $router->get('/login', 'PagesController@login');
 $router->get('/logout', 'PagesController@logout');
 $router->get('/register', 'PagesController@register');
+$router->get('/profile', 'PagesController@profile');
 
 $router->set404('PagesController@error404');
 

@@ -45,7 +45,7 @@ class PagesController
     }
 
     public static function checkSession(){
-        if(!isset($_SESSION["MYSESSION"])){
+        if(!isset($_SESSION["PSESSION"])){
             header('Location: login');
             exit();
         }
@@ -62,14 +62,9 @@ class PagesController
 
     public static function checkSessionToHome(){
         $validate = AuthController::validateAuthToken();
-        if($validate && isset($_SESSION["MYSESSION"]) && $validate != "expired"){
+        if($validate && isset($_SESSION["PSESSION"]) && $validate != "expired"){
             header('Location: home');
         }
-    }
-
-    // VER VARIABLES DE SESSION
-    public static function session() {
-        require_once "./src/views/pages/_session.php";
     }
 
     // PÁGINA NO AUTORIZADO
@@ -79,7 +74,6 @@ class PagesController
 
     // PÁGINA HOME
     public static function home() {
-        // self::checkSession();
         self::pageScript('home');
         require_once "./src/views/pages/home.php";
     }
@@ -100,6 +94,13 @@ class PagesController
     public static function register() {
         self::pageScript('register');
         require_once "./src/views/pages/register.php";
+    }
+
+    // PÁGINA PERFIL
+    public static function profile() {
+        self::checkSession();
+        self::pageScript('profile');
+        require_once "./src/views/pages/profile.php";
     }
 
     // PÁGINA ERROR 404

@@ -1,29 +1,29 @@
-<div>
+<div class="p-5 d-flex justify-content-center flex-column align-items-center w-100 h-100">
     <div>
-        <h3>Register</h3>
+        <h3>Registro</h3>
     </div>
-    <form method="post" id="register">
-        <div>
-            <label for="username">Username:</label>
-            <input type="text" name="username" id="username" required>
+    <form method="post" id="register" class="box-form">
+        <div class="mb-3 mt-3">
+            <label for="username" class="form-label">Nombre de usuario:</label>
+            <input type="text" class="form-control" id="username" placeholder="ingresa un username" name="username">
         </div>
-        <div>
-            <label for="email">Email:</label>
-            <input type="email" name="email" id="email" required>
+        <div class="mb-3">
+            <label for="pass" class="form-label">Contraseña:</label>
+            <input type="password" class="form-control" id="pass" placeholder="Ingresa una contraseña" name="pass">
         </div>
-        <div>
-            <label for="pass">Password:</label>
-            <input type="password" name="pass" id="pass" required>
+        <div class="mb-3">
+            <label for="cpass" class="form-label">Confirmación de contraseña:</label>
+            <input type="password" class="form-control" id="cpass" placeholder="Confirma tu contraseña" name="cpass">
         </div>
-        <div>
-            <label for="cpass">Confirm password:</label>
-            <input type="password" id="cpass" required>
+        <div class="d-flex justify-content-end">
+            <a href="login"><span>Ya tengo cuenta</span></a>
         </div>
+        
         <!-- <div>
             <div class="g-recaptcha" data-sitekey="<?php echo $_ENV['RECAPTCHA_SITEKEY'] ?>"></div>
         </div> -->
-        <div>
-            <button type="submit">Send</button>
+        <div class="text-center mt-2">
+            <button type="submit" class="btn btn-primary">Registrarse</button>
         </div>
     </form>
 </div>
