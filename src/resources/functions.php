@@ -202,7 +202,7 @@ function getData() {
  * @return -The function `getPostData()` is returning the value of `['data']`.
  */
 function getPostData() {
-    return $_POST['data'];
+    return $_POST['data'] ?? $_POST;
 }
 
 /**

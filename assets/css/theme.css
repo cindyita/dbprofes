@@ -1,16 +1,18 @@
 /*---------VARIABLES---------*/
 :root {
-  --primary: #8a98ff;
-  --secondary: rgb(173, 47, 173);
+  --primary: #7787fc;
+  --secondary: rgb(181, 101, 255);
   --font: #f8f8f8;
   --fontBox: #eeeeee;
   --text: rgb(29, 29, 29);
+  --grey: rgb(218, 218, 218);
 }
 
 [data-theme="dark"] {
   --font: #1d1d1d;
   --fontBox: rgb(19, 19, 19);
   --text: white;
+  --grey: rgb(92, 92, 92);
 }
 
 /*----------GENERAL----------*/
@@ -24,6 +26,9 @@ html,body {
 }
 a {
   color: var(--primary);
+}
+a:hover {
+  opacity:0.8;
 }
 
 /*----------MESSAGES----------*/
@@ -57,7 +62,7 @@ a {
   background-color: var(--primary);
 }
 .btn-muted {
-  background-color: grey;
+  background-color: var(--grey);
   border:0;
   border-radius: 15px;
   cursor: pointer;
@@ -108,6 +113,9 @@ a {
   color: var(--text);
   border-radius:20px;
 }
+a.link-user{
+  color: var(--secondary);
+}
 .box-search,.box-form {
   width: 25%;
 }
@@ -116,6 +124,8 @@ a {
 }
 .op-img img {
   border: 1px solid lightgrey;
+  max-width: 150px;
+  max-height: 200px;
 }
 .op-img:hover img {
   opacity: 0.8;
@@ -224,9 +234,19 @@ a {
 .modal-header .btn-close {
     background-color: white;
 }
+/*-----COLLAPSE-------*/
+.collapse {
+  transition: max-height 0.3s ease;
+  overflow: hidden;
+}
 /*-------OTROS-------*/
 .hidden {
   display: none;
+}
+.like.active,
+.like.active i,
+.like.active span {
+  color: var(--secondary);
 }
 /*------------LOADER----------*/
 .page-overlay {
