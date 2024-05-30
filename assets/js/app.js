@@ -6,7 +6,13 @@ const CONTROLLER = pageController();
 `fadeOut()` method on them. This code is likely intended to fade out any elements with the
 "page-overlay" class when the document is ready or when the DOM has finished loading. */
 $(function () {
-  $(".page-overlay").fadeOut();
+  var timeout = setTimeout(function() {
+    alert('Parece que hay problemas de conexión. Intente recargar la página o regrese más tarde.');
+  }, 8000);
+  $(".page-overlay").fadeOut(function() {
+    clearTimeout(timeout);
+  });
+  
 });
 
 /**
@@ -18,15 +24,18 @@ $(function () {
  * message being displayed. By default, the type is set to "info", but it can be overridden with a
  * different type such as "success", "warning", or "error" depending on the message being displayed
  */
+var typesAlert = { "error": "alert-danger", "info": "alert-info", "success": "alert-success", "warning": "alert-warning" };
+var typesAlertText = { "error": "Error", "info": "Info", "success": "Éxito", "warning": "Aviso" };
+
 function message(text, type = "info") {
-  var html = '<div class="message '+type+'">'+text+'</div>';
+  var html = '<div class="message"><div class="alert alert-dismissible '+typesAlert[type]+'"><button type="button" data-bs-dismiss="alert" class="close"><i class="fa-solid fa-xmark"></i></button><strong>'+typesAlertText[type]+':</strong> '+text+'</div></div>';
   var $message = $(html);
   $message.hide().prependTo('body').fadeIn();
   setTimeout(function() {
       $message.fadeOut(function() {
           $(this).remove();
       });
-  }, 4000);
+  }, 6500);
 }
 
 /**
@@ -43,8 +52,8 @@ function processError(res) {
     case 1:
       return true;
     case 2:
-      message("The email or password is incorrect", "error");
-      console.log("Error 2: The email or password is incorrect");
+      message("Los datos son incorrectos", "error");
+      console.log("Error 2: Algunos datos son incorrectos");
       return false;
     default:
       console.log("Error: "+res);
@@ -207,4 +216,90 @@ function transposeData(modalid, data) {
             }
         }
     }
+}
+
+/**
+ * The function `handleFileImage` is used to handle and validate an image file, and display a preview
+ * of the image.
+ * @param files - An array of files that the user has selected. It should contain only one file.
+ * @param previewId - The `previewId` parameter is the ID of the HTML element where you want to display
+ * the preview of the selected image file.
+ * @returns The function does not explicitly return anything.
+ */
+function handleFileImage(files, previewId) {
+    const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff"];
+    var preview = $("#" + previewId);
+    var file = files[0];
+
+    // Validations
+    var maxSizeInBytes = 500 * 1024 * 1024; // 500 MB
+    if (file.size > maxSizeInBytes) {
+        message("error", "El archivo '" + file.name + "' excede el límite de tamaño permitido");
+        return;
+    }
+    var fileExtension = file.name.split(".").pop().toLowerCase();
+    if (allowedExtensions.indexOf(fileExtension) === -1) {
+        message("error", "El archivo '" + file.name + "' tiene una extensión no permitida");
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        preview.attr("src", e.target.result);
+    };
+    reader.readAsDataURL(file);
+}
+
+function handleFileImages(files, previewId) {
+    const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff"];
+    var previewContainer = $("#" + previewId);
+    previewContainer.empty();
+
+    var maxSizeInBytes = 500 * 1024 * 1024; // 500 MB
+
+    Array.from(files).forEach(file => {
+        // Validations
+        if (file.size > maxSizeInBytes) {
+            message("El archivo '" + file.name + "' excede el límite de tamaño permitido","error");
+            return;
+        }
+
+        var fileExtension = file.name.split(".").pop().toLowerCase();
+        if (allowedExtensions.indexOf(fileExtension) === -1) {
+            message("El archivo '" + file.name + "' tiene una extensión no permitida","error");
+            return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var img = $("<img />", {
+                src: e.target.result,
+                class: "img-preview",
+                width: "120px"
+            });
+            var imgContainer = $("<div></div>", {
+                class: "img-container"
+            });
+            imgContainer.append(img);
+            previewContainer.append(imgContainer);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function dateFormatAll() {
+  $('.dateFormat').each(function () {
+    const dateText = $(this).text().trim();
+    const date = new Date(dateText);
+
+    if (!isNaN(date)) {
+      const formattedDate = date.toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      $(this).text(formattedDate);
+    }
+  });
+  console.log("Se han formateado las fechas");
 }

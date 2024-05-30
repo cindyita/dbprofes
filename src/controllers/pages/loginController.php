@@ -9,17 +9,17 @@ if (!empty(getView())) {
             login();
         break;
         default:
-            echo "No action defined";
+            echo "No se ha definido una acción";
         break;
     }
 }
 
 function login(){
     $data = $_POST;
-    // if(checkCaptcha($data['g-recaptcha-response']) == true){
+    if(checkCaptcha($data['g-recaptcha-response']) == true){
         $response = AuthController::auth($data);
-    // } else {
-    //     return 3;
-    // }
+    } else {
+        return 3;
+    }
     echo json_encode($response);
 }

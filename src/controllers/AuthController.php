@@ -15,10 +15,10 @@ class AuthController
     
             if (!empty($data) && count($data)>0) {
                 $db = new QueryModel();
-                $email = $data['email'];
-                $pass = md5($data['pass']);
-                $row = $db->unique("users","email = '$email'");
-                if($row && $row != [] && $pass == $row['password']){
+                $username = $data['username'];
+                $pass = $data['pass'];
+                $row = $db->queryUnique("SELECT u.id,u.username,u.password,u.email,u.biography,u.id_role,r.name role,u.timestamp_create FROM SYS_USER u LEFT JOIN SYS_ROLE r ON u.id_role = r.id WHERE u.username = :username",[':username' => $username]);
+                if($row && $row != [] && password_verify($pass, $row['password'])){
 
                     session_start();
 
@@ -27,6 +27,7 @@ class AuthController
                             $_SESSION['PSESSION'][$key] = $value;
                         }
                     }
+
                     $id = $row['id'];
                     $_SESSION['PSESSION']['userid'] = $id;
 
@@ -35,7 +36,7 @@ class AuthController
                     setcookie('AuthToken', $token, [
                         'expires' => time() + 60*60*24*30, // 30 días
                         'path' => '/',
-                        // 'domain' => 'tudominio.com',
+                        // 'domain' => '',
                         'secure' => true,
                         'httponly' => true,
                         'samesite' => 'Lax'
@@ -108,7 +109,7 @@ class AuthController
         }
         $id = $info->data;
         $db = new QueryModel();
-        $row = $db->value("users","id = $id","id");
+        $row = $db->value("SYS_USER","id = $id","id");
         return $row;
     }
 

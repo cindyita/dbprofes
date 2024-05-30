@@ -75,6 +75,10 @@ class PagesController
     // PÁGINA HOME
     public static function home() {
         self::pageScript('home');
+        $db = new QueryModel();
+        $form_grading = $db->select("REG_FORM_GRADING");
+        $time_grading = $db->select("REG_TIME_GRADING");
+        $accessibility = $db->select("REG_ACCESSIBILITY");
         require_once "./src/views/pages/home.php";
     }
 
@@ -101,6 +105,13 @@ class PagesController
         self::checkSession();
         self::pageScript('profile');
         require_once "./src/views/pages/profile.php";
+    }
+
+    // PÁGINA OPINIONES
+    public static function myopinions() {
+        self::checkSession();
+        self::pageScript('myopinions');
+        require_once "./src/views/pages/myopinions.php";
     }
 
     // PÁGINA ERROR 404

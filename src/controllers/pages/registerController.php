@@ -14,7 +14,7 @@ if (!empty(getView())) {
             register();
         break;
         default:
-            echo "No action defined";
+            echo "No se ha definido una acción";
         break;
     }
 }
@@ -22,8 +22,8 @@ if (!empty(getView())) {
 function checkExistEmail() {
     $data = getPostData();
     $db = new QueryModel();
-    if (!empty($data) && count($data)>0) {
-        $row = $db->queryUnique("SELECT email FROM users WHERE email=:email",[":email"=>$data['email']]);
+    if (!empty($data)) {
+        $row = $db->queryUnique("SELECT email FROM SYS_USER WHERE email=:email",[":email"=>$data['email']]);
         $response = json_encode($row);
     } else {
         $response = json_encode(['error'=>'Invalid format or no info']);
@@ -35,8 +35,8 @@ function checkExistEmail() {
 function checkExistUsername() {
     $data = getPostData();
     $db = new QueryModel();
-    if (!empty($data) && count($data)>0) {
-        $row = $db->queryUnique("SELECT username FROM users WHERE username=:username",[":username"=>$data['username']]);
+    if (!empty($data)) {
+        $row = $db->queryUnique("SELECT username FROM SYS_USER WHERE username=:username",[":username"=>$data['username']]);
         $response = json_encode($row);
     } else {
         $response = json_encode(['error'=>'Invalid format or no info']);
@@ -47,10 +47,11 @@ function checkExistUsername() {
 
 function register(){
     $data = $_POST;
-    // if(checkCaptcha($data['g-recaptcha-response']) == true){
+    if(checkCaptcha($data['g-recaptcha-response']) == true){
         $db = new QueryModel();
         if (!empty($data) && count($data)>0) {
-            $row = $db->query("INSERT INTO users(username,email,password) VALUES (:username,:email,:pass)",[":username"=>$data['username'],":email"=>$data['email'],":pass"=>md5($data['pass'])]);
+            $key = password_hash($data['pass'], PASSWORD_DEFAULT);
+            $row = $db->query("INSERT INTO SYS_USER(username,email,password) VALUES (:username,:email,:pass)",[":username"=>$data['username'],":email"=>$data['email'],":pass"=>$key]);
             $response = json_encode($row);
             if($response){
                 sendEmail($data['email'],$data['username'],"Welcome","welcome to the page, you have successfully registered");
@@ -59,8 +60,8 @@ function register(){
             $response = json_encode(['error'=>'Invalid format or no info']);
         }
         $db->close();
-    // } else {
-    //     return 3;
-    // }
+    } else {
+        return 3;
+    }
     echo json_encode($response);
 }

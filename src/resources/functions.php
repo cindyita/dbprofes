@@ -1,5 +1,5 @@
 <?php
-
+// use ModelsNS\QueryModel;
 /**
  * The function `getSessionItem` retrieves a value from the `` array based on a specified key,
  * with a default value returned if the key is not found or the value is empty.
@@ -239,4 +239,216 @@ function checkCaptcha($response){
     $recaptcha = json_decode($recaptcha); 
 
     return $recaptcha->success;
+}
+
+
+/**
+ * The function `dataInQuery` processes an array of data by removing specific keys and optionally
+ * adding an 'id_user' key based on a condition.
+ * 
+ * @param data The `data` parameter in the `dataInQuery` function is expected to be an array.
+ * @param idUser The `idUser` parameter in the `dataInQuery` function is a boolean parameter that
+ * determines whether to include the `id_user` field in the data array. If `idUser` is true, it will
+ * set the `id_user` field to the value stored in `['PSESSION
+ * 
+ * @return The function `dataInQuery` is returning the modified `` array with the keys `__view__`
+ * and `id` unset. If the `` parameter is true, it also sets the key `id_user` to the value of
+ * `['PSESSION']['id']`. If the input `` is not an array, the function returns false.
+ */
+function dataInQuery($data,$idUser = false,$unset = []){
+    if(is_array($data)){
+        unset($data['__view__']);
+        unset($data['id']);
+        if($idUser){
+            $data['id_user'] = $_SESSION['PSESSION']['id'];
+        }
+        if($unset != []){
+            foreach ($unset as $value) {
+                unset($data[$value]);
+            }
+        }
+        return $data;
+    }
+    return false;
+}
+
+function dataForUpdate($data){
+    $id = $data['id'];
+    $fields = dataInQuery($data);
+
+    $setParams = [];
+    $params = [":id"=>$id];
+    foreach ($fields as $key => $value) {
+        if ($value !== null) {
+            $setParams[] = "$key = :$key";
+            $params[":$key"] = $value;
+        }
+    }
+    return ["setParams"=>$setParams,"params"=>$params];
+}
+
+function dataForInsert($data, $dataunset = [],$dataAdd = []){
+    $fields = dataInQuery($data,true,$dataunset);
+    if($dataAdd != []){
+        foreach ($dataAdd as $key => $value) {
+            $fields[$key] = $value;
+        }
+    }
+    $setParams = [];
+    $setValues = [];
+    $params = [];
+    foreach ($fields as $key => $value) {
+        if ($value !== null) {
+            $setParams[] = "$key";
+            $setValues[] = ":$key";
+            $params[":$key"] = $value; 
+        }
+    }
+    return ["setParams"=>$setParams,"setValues"=>$setValues,"params"=>$params];
+}
+
+// function dataInsert($data,$table){
+//     $db = new QueryModel();
+//     $fields = dataForInsert($data);
+
+//     if (!empty($fields['setParams'])) {
+//         $setQueryParams = implode(',', $fields['setParams']);
+//         $setQueryValues = implode(',', $fields['$setValues']);
+//          $params = $fields['params'];
+//         $row = $db->query("INSERT INTO $table($setQueryParams) VALUES($setQueryValues)",$params);
+//         return $row;
+//     }
+// }
+
+function processUpdate($row){
+    if($row == []){
+        return 1;
+    }else{
+        return json_encode($row);
+    }
+}
+
+/**
+ * The `dateFormat` function takes a datetime string and returns a formatted date in the format
+ * "dd-mm-yyyy".
+ * 
+ * @param $datetime The parameter "datetime" is expected to be a string representing a date and time in
+ * a specific format.
+ * 
+ * @return -the formatted date in the format "d-m-Y".
+ */
+function dateFormat($datetime) {
+    if($datetime && $datetime != "0000-00-00"){
+        $timestamp = strtotime($datetime);
+        $newdate = date('d-m-Y', $timestamp);
+        return $newdate;
+    }
+    return "";
+}
+
+function createFile($campo,$ruta,$nameFile = "",$reemplazar = 1) {
+    try{
+        if (isset($_FILES[$campo]) && $_FILES[$campo]['error'] === UPLOAD_ERR_OK){
+
+            $datetime = date('Y-m-d H:i:s');
+            $timestamp = strtotime($datetime);
+            $dateNumber = preg_replace('/[^0-9]/', '', strval($timestamp));
+
+            $originalFileName = $_FILES[$campo]['name'];
+            $extension = strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION));
+            $nameFile = $nameFile ? $nameFile.'.'.$extension : $originalFileName;
+            $type = $_FILES[$campo]['type'];
+            $temp = $_FILES[$campo]['tmp_name'];
+
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff']; // Extensiones permitidas
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff']; // Tipos MIME permitidos
+
+
+            if (!in_array($extension, $allowedExtensions)) {
+                return 6;
+            }
+
+            if (!in_array($type, $allowedMimeTypes)) {
+                return 6;
+            }
+
+            if (!file_exists($ruta)) {
+                mkdir($ruta, 0777, true);
+            }
+
+            $routeSave = $ruta. $nameFile;
+            if (file_exists($routeSave) && !$reemplazar) {
+                $nameFile = $dateNumber.'_'.$nameFile;
+                $routeSave = $ruta. $nameFile;
+            }
+            $res = move_uploaded_file($temp, $routeSave);
+
+            if($res){
+                return $nameFile;
+            }else{
+                return null;
+            }
+            
+        }else{
+            return null;
+        }
+    }catch(PDOException $e){
+        return "Error en la consulta: " . $e->getMessage();
+    }
+}
+
+function createMultiFiles($campo, $ruta, $nameFile = "", $reemplazar = 1) {
+    try {
+        if (isset($_FILES[$campo]) && !empty($_FILES[$campo]['name'][0])) {
+
+            $datetime = date('Y-m-d H:i:s');
+            $timestamp = strtotime($datetime);
+            $dateNumber = preg_replace('/[^0-9]/', '', strval($timestamp));
+
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff']; // Extensiones permitidas
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff']; // Tipos MIME permitidos
+
+            $result = [];
+
+            foreach ($_FILES[$campo]['name'] as $key => $originalFileName) {
+                $extension = strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION));
+                $type = $_FILES[$campo]['type'][$key];
+                $temp = $_FILES[$campo]['tmp_name'][$key];
+
+                if (!in_array($extension, $allowedExtensions)) {
+                    $result[] = ['file' => $originalFileName, 'status' => 6];
+                    continue;
+                }
+
+                if (!in_array($type, $allowedMimeTypes)) {
+                    $result[] = ['file' => $originalFileName, 'status' => 6];
+                    continue;
+                }
+
+                if (!file_exists($ruta)) {
+                    mkdir($ruta, 0777, true);
+                }
+
+                $finalNameFile = $nameFile ? $nameFile . '_' . $key . '.' . $extension : $originalFileName;
+                $routeSave = $ruta . $finalNameFile;
+                if (file_exists($routeSave) && !$reemplazar) {
+                    $finalNameFile = $dateNumber . '_' . $finalNameFile;
+                    $routeSave = $ruta . $finalNameFile;
+                }
+
+                $res = move_uploaded_file($temp, $routeSave);
+
+                if ($res) {
+                    $result[] = [$finalNameFile];
+                }
+            }
+
+            return $result;
+
+        } else {
+            return null;
+        }
+    } catch (PDOException $e) {
+        return "Error en la consulta: " . $e->getMessage();
+    }
 }

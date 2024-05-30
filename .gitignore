@@ -14,6 +14,6 @@ package-lock.json
 .env.*.local
 .idea/
 .vscode/
-/assets/docs/
 /assets/img/user/
+/assets/img/posts/
 

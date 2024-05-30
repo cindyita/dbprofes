@@ -4,7 +4,6 @@
     margin:0;
     padding:0;
     box-sizing: border-box;
-    transition: 0.3s ease;
 }
 body {
     position:relative;
@@ -22,8 +21,30 @@ li{
 a {
     cursor: pointer;
 }
+a:hover {
+    color: inherit;
+}
 a,nav a,li span,td a {
     text-decoration: none;
+}
+
+hr {
+    background-color: grey;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+input.form-control:focus,
+select.form-control:focus,
+a:focus,
+.btn-close:focus,
+.btn,.btn:focus {
+    outline:none !important;
+    outline-width: 0 !important;
+    box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    -webkit-box-shadow: none !important;
 }
 
 /*------------------------------------*/

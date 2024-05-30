@@ -1,10 +1,18 @@
 /*---------VARIABLES---------*/
 :root {
   --primary: #8a98ff;
-  --font: #0C0C0C;
-  --fontBox: #353535;
+  --secondary: rgb(173, 47, 173);
+  --font: #f8f8f8;
+  --fontBox: #eeeeee;
+  --text: rgb(29, 29, 29);
+}
+
+[data-theme="dark"] {
+  --font: #1d1d1d;
+  --fontBox: rgb(19, 19, 19);
   --text: white;
 }
+
 /*----------GENERAL----------*/
 html,body {
   background-color: var(--font);
@@ -37,12 +45,41 @@ a {
   border-radius: 15px;
   cursor: pointer;
 }
+.btn-primary i {
+  color: white !important;
+}
 .btn-primary:hover {
   background-color: var(--primary);
   opacity:0.8;
 }
+.btn-primary:focus {
+  border: 1px solid white;
+  background-color: var(--primary);
+}
+.btn-muted {
+  background-color: grey;
+  border:0;
+  border-radius: 15px;
+  cursor: pointer;
+  color: var(--text) !important;
+}
+.btn-muted:hover {
+  opacity:0.8;
+}
+.btn-load {
+  display: none;
+}
+.btn-icon {
+  cursor: pointer;
+}
+.btn-icon i {
+  font-size: 14pt;
+}
+.btn-icon:hover {
+  color: var(--secondary);
+}
 .text-primary,.card i,.card a {
-  color: var(--primary) !important;
+  color: var(--primary);
 }
 .box-comments {
   color: var(--primary);
@@ -52,11 +89,16 @@ a {
   font-size: 35pt;
   padding-right: 15px;
 }
+
 .form-control,.form-control:focus,
 .form-select, .form-select:focus {
   border-radius: 15px;
   background-color: var(--fontBox);
   color: var(--text);
+}
+.card .form-control,.card .form-control:focus,
+.card .form-select, .card .form-select:focus {
+  background-color: var(--font);
 }
 .form-select {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
@@ -64,12 +106,19 @@ a {
 .card {
   background-color: var(--fontBox);
   color: var(--text);
+  border-radius:20px;
 }
 .box-search,.box-form {
   width: 25%;
 }
 .comment-reply {
   padding-left: 50px;
+}
+.op-img img {
+  border: 1px solid lightgrey;
+}
+.op-img:hover img {
+  opacity: 0.8;
 }
 .menu i {
   font-size: 20px;
@@ -82,8 +131,21 @@ a {
   border-bottom: 1px solid grey;
   width: 100%;
 }
+.opinionForm {
+  width: 50%;
+}
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
 
-@media screen and (max-width: 700px){
+@media screen and (max-width: 1300px){
+  .box-search,.box-form {
+    width: 50%;
+  }
+}
+
+@media screen and (max-width: 1000px){
   .icon-comment {
     display:none;
   }
@@ -96,9 +158,76 @@ a {
   .comment-reply {
     padding-left: 8px;
   }
+  .opinionForm {
+    width: 100%;
+  }
 }
-
-
+.text-primary {
+  color: var(--primary) !important;
+}
+/*----------MESSAGES----------*/
+.message {
+  position: fixed;
+  top: 10px;
+  /* width: 100%; */
+  left: 10px;
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+}
+.message .notification {
+  padding-right: 45px;
+  min-width: 250px;
+}
+/*----------*/
+.alert {
+  padding: 12px 40px 12px 20px;
+  position: relative;
+  border: 0;
+  border-radius: 15px;
+}
+.alert .close {
+  background-color: transparent;
+  border: 0;
+  position: absolute;
+  right: 15px;
+  top: 13px;
+}
+.alert .close:hover {
+  color: grey;
+}
+/*-------DROPDOWN-------*/
+.dropdown-menu {
+  background-color: var(--fontBox);
+  border-radius: 15px;
+  color: var(--text);
+}
+.dropdown-menu .dropdown-item,
+.dropdown-menu .dropdown-item i{
+  color: var(--text);
+  font-size: 12pt;
+}
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus,
+.dropdown-menu .dropdown-item:hover i,
+.dropdown-menu .dropdown-item:focus i {
+  color: var(--primary);
+  background-color: var(--fontBox);
+}
+/*------MODAL--------*/
+.modal-content {
+  background-color: var(--fontBox);
+  border-radius: 15px;
+  color: var(--text);
+  border: 1px solid lightgrey;
+}
+.modal-header .btn-close {
+    background-color: white;
+}
+/*-------OTROS-------*/
+.hidden {
+  display: none;
+}
 /*------------LOADER----------*/
 .page-overlay {
     position: fixed;
