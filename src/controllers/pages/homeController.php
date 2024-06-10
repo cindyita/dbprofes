@@ -387,7 +387,7 @@ function like($type = 1){
             echo json_encode("Ya has dado like");
         }
     }else{
-        echo 2;
+        echo 3;
     }
     
     
@@ -396,8 +396,12 @@ function like($type = 1){
 function dislike($type = 1){
     $data = getPostData();
     $id = $data['id'];
-    $db = new QueryModel();
-    $iduser = $_SESSION['PSESSION']['id'];
-    $row = $db->delete("REL_LIKES","id_user = $iduser AND type_opinion = $type AND id_opinion_response = $id");
-    echo json_encode($row);
+    if(isset($_SESSION['PSESSION'])){
+        $db = new QueryModel();
+        $iduser = $_SESSION['PSESSION']['id'];
+        $row = $db->delete("REL_LIKES","id_user = $iduser AND type_opinion = $type AND id_opinion_response = $id");
+        echo json_encode($row);
+    }else{
+        echo 3;
+    }
 }

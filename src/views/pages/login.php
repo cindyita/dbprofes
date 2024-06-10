@@ -24,7 +24,7 @@
             <div class="g-recaptcha" data-sitekey="<?php echo $_ENV['RECAPTCHA_SITEKEY'] ?>"></div>
         </div>
         <div class="text-center mt-2">
-            <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+            <button type="submit" class="btn btn-primary" id="btnSend">Iniciar sesión</button>
         </div>
     </form>
 </div>

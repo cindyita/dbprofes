@@ -61,7 +61,7 @@ function register(){
         }
         $db->close();
     } else {
-        return 3;
+        return 4;
     }
     echo json_encode($response);
 }

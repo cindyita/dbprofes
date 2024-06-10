@@ -18,6 +18,7 @@ $(function () {
 
     $("#register").on("submit", async function (event) {
         event.preventDefault();
+        loadBtn("btnSend");
         var emailValid = await checkEmail();
         var usernameValid = await checkUsername();
         var pass = checkPass();
@@ -35,7 +36,8 @@ $(function () {
                         message("Algo salió mal", "error");
                         console.log(res);
                     }
-                    
+                    grecaptcha.reset();
+                    unLoadBtn("btnSend","Registrarse");
                 }).catch(function (error) {
                     message("Algo salió mal", "error");
                     console.error(error);

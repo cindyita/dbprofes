@@ -55,6 +55,14 @@ function processError(res) {
       message("Los datos son incorrectos", "error");
       console.log("Error 2: Algunos datos son incorrectos");
       return false;
+    case 3:
+      message("Necesitas estar logeado para realizar esta acción", "error");
+      console.log("Error 3: Necesitas estar logeado para realizar esta acción");
+      return false;
+    case 4:
+      message("El captcha es inválido. Recarga la página.", "error");
+      console.log("Error 4: El captcha es inválido");
+      return false;
     default:
       console.log("Error: "+res);
       return false;
@@ -302,4 +310,14 @@ function dateFormatAll() {
     }
   });
   console.log("Se han formateado las fechas");
+}
+
+function loadBtn(id) {
+  $("#" + id).html('<div class="spinner-border text-muted"></div>');
+  $("#" + id).prop("disabled", true);
+}
+
+function unLoadBtn(id,text = "Enviar") {
+  $("#" + id).html(text);
+  $("#" + id).prop("disabled", false);
 }

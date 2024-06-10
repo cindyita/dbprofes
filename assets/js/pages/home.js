@@ -181,7 +181,7 @@ function toggleLike(element, id, typeLike = 'like', typePost = 'post') {
     
     var action = (typeLike + typePost).toUpperCase();
     sendAjax({ id: id }, action).then(function (res) {
-        if (res == 2) {
+        if (res == 3) {
             console.log("Necesitas estar logeado para dar like");
             return;
         }
