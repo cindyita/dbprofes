@@ -89,20 +89,34 @@ function loadOpinions(){
     $limit = $data['limit'] ?? 15;
     $offset = $data['offset'] ?? 0;
     $db = new QueryModel();
-    $iduser = $_SESSION['PSESSION']['id'];
 
-    $opinions = $db->query("SELECT o.*,u.username,a.name accessibility,f.name form_grading,t.name time_grading,img.img,img.num_img, ps.num_likes likes, ps.num_responses responses,
-    IF(rl.id_opinion_response IS NOT NULL, 1, 0) AS user_liked
-        FROM POST_OPINION o 
-        LEFT JOIN SYS_USER u ON o.id_user = u.id
-        LEFT JOIN REG_ACCESSIBILITY a ON o.id_accessibility = a.id
-        LEFT JOIN REG_FORM_GRADING f ON o.id_form_grading = f.id
-        LEFT JOIN REG_TIME_GRADING t ON o.id_time_grading = t.id
-        LEFT JOIN POST_IMG img ON img.id_opinion_response = o.id AND img.type_opinion = 1
-        LEFT JOIN VIEW_POST_STATS ps ON ps.post_id = o.id
-        LEFT JOIN REL_LIKES rl ON o.id = rl.id_opinion_response AND rl.type_opinion = 1 AND rl.id_user = :id_user
-        ORDER BY o.id DESC
-        LIMIT :limits OFFSET :offset",[":id_user"=>$iduser,':limits'=>$limit,":offset"=>$offset]);
+    if(isset($_SESSION['PSESSION'])){
+        $iduser = $_SESSION['PSESSION']['id'];
+        $opinions = $db->query("SELECT o.*,u.username,a.name accessibility,f.name form_grading,t.name time_grading,img.img,img.num_img, ps.num_likes likes, ps.num_responses responses,
+        IF(rl.id_opinion_response IS NOT NULL, 1, 0) AS user_liked
+            FROM POST_OPINION o 
+            LEFT JOIN SYS_USER u ON o.id_user = u.id
+            LEFT JOIN REG_ACCESSIBILITY a ON o.id_accessibility = a.id
+            LEFT JOIN REG_FORM_GRADING f ON o.id_form_grading = f.id
+            LEFT JOIN REG_TIME_GRADING t ON o.id_time_grading = t.id
+            LEFT JOIN POST_IMG img ON img.id_opinion_response = o.id AND img.type_opinion = 1
+            LEFT JOIN VIEW_POST_STATS ps ON ps.post_id = o.id
+            LEFT JOIN REL_LIKES rl ON o.id = rl.id_opinion_response AND rl.type_opinion = 1 AND rl.id_user = :id_user
+            ORDER BY o.id DESC
+            LIMIT :limits OFFSET :offset",[":id_user"=>$iduser,':limits'=>$limit,":offset"=>$offset]);
+    }else{
+        $opinions = $db->query("SELECT o.*,u.username,a.name accessibility,f.name form_grading,t.name time_grading,img.img,img.num_img, ps.num_likes likes, ps.num_responses responses,
+        0 AS user_liked
+            FROM POST_OPINION o 
+            LEFT JOIN SYS_USER u ON o.id_user = u.id
+            LEFT JOIN REG_ACCESSIBILITY a ON o.id_accessibility = a.id
+            LEFT JOIN REG_FORM_GRADING f ON o.id_form_grading = f.id
+            LEFT JOIN REG_TIME_GRADING t ON o.id_time_grading = t.id
+            LEFT JOIN POST_IMG img ON img.id_opinion_response = o.id AND img.type_opinion = 1
+            LEFT JOIN VIEW_POST_STATS ps ON ps.post_id = o.id
+            ORDER BY o.id DESC
+            LIMIT :limits OFFSET :offset",[':limits'=>$limit,":offset"=>$offset]);
+    }
     
     $html = "";
 
@@ -362,15 +376,20 @@ function postResponse(){
 function like($type = 1){
     $data = getPostData();
     $id = $data['id'];
-    $db = new QueryModel();
-    $iduser = $_SESSION['PSESSION']['id'];
-    $searchlike = $db->select("REL_LIKES","id_user = $iduser AND type_opinion = $type AND id_opinion_response = $id");
-    if(!$searchlike){
-        $row = $db->query("INSERT INTO REL_LIKES(id_user,type_opinion,id_opinion_response) VALUES(:id_user,:type,:id_opinion)",[':id_user'=>$iduser,":type"=>$type,":id_opinion"=>$id]);
-        echo json_encode($row);
+    if(isset($_SESSION['PSESSION'])){
+        $db = new QueryModel();
+        $iduser = $_SESSION['PSESSION']['id'];
+        $searchlike = $db->select("REL_LIKES","id_user = $iduser AND type_opinion = $type AND id_opinion_response = $id");
+        if(!$searchlike){
+            $row = $db->query("INSERT INTO REL_LIKES(id_user,type_opinion,id_opinion_response) VALUES(:id_user,:type,:id_opinion)",[':id_user'=>$iduser,":type"=>$type,":id_opinion"=>$id]);
+            echo json_encode($row);
+        }else{
+            echo json_encode("Ya has dado like");
+        }
     }else{
-        echo json_encode("Ya has dado like");
+        echo 2;
     }
+    
     
 }
 

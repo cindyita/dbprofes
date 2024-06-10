@@ -178,18 +178,22 @@ function toggleLike(element, id, typeLike = 'like', typePost = 'post') {
     console.log(`Se ha dado Like/dislike a un ${typePost}`);
     var numLikes = parseInt($(element).find("span").text());
     var functionAtr = "";
-    if (typeLike == 'like') {
-        numLikes++;
-        functionAtr = "toggleLike(this,"+id+",'dislike','" + typePost + "')";
-        $(element).addClass("active");
-    } else if(typeLike == 'dislike' && numLikes > 0) {
-        numLikes--;
-        $(element).removeClass("active");
-        functionAtr = "toggleLike(this,"+id+",'like','"+typePost+"')";
-    }
+    
     var action = (typeLike + typePost).toUpperCase();
     sendAjax({ id: id }, action).then(function (res) {
-        console.log(res);
+        if (res == 2) {
+            console.log("Necesitas estar logeado para dar like");
+            return;
+        }
+        if (typeLike == 'like') {
+            numLikes++;
+            functionAtr = "toggleLike(this,"+id+",'dislike','" + typePost + "')";
+            $(element).addClass("active");
+        } else if(typeLike == 'dislike' && numLikes > 0) {
+            numLikes--;
+            $(element).removeClass("active");
+            functionAtr = "toggleLike(this,"+id+",'like','"+typePost+"')";
+        }
         $(element).find("span").text(numLikes);
         $(element).attr('onclick', functionAtr);
     }).catch(function (error) {
