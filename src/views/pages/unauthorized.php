@@ -1,1 +1,1 @@
-<p>You do not have permissions to view this page</p>
+<p>No tienes permisos para ver esta página.</p>

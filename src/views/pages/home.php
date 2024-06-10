@@ -1,4 +1,4 @@
-<div class="px-4">
+<div class="px-1 px-lg-4">
 
     <div class="d-flex justify-content-center flex-column align-items-center">
 
@@ -83,7 +83,14 @@
 
         <div class="p-4 box-search">
             <div class="input-group">
-                <input type="text" class="form-control" placeholder="Buscar profesor..">
+                <input type="text" class="form-control" id="search-input" placeholder="Buscar...">
+                <div class="form-select-content">
+                    <select class="form-select">
+                        <option>Profesor</option>
+                        <option>Escuela</option>
+                        <option>Asignatura</option>
+                    </select>
+                </div>
                 <span class="input-group-text btn-primary">Buscar</span>
             </div>
         </div>

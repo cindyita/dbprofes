@@ -1,4 +1,4 @@
-<div class="p-5 d-flex justify-content-center flex-column align-items-center w-100 h-100">
+<div class="p-3 p-lg-5 d-flex justify-content-center flex-column align-items-center w-100 h-100">
     <div>
         <h3>Login</h3>
     </div>

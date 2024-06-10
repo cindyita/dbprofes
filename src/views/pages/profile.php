@@ -1,6 +1,6 @@
-<div class="p-5 container">
+<div class="p-3 p-lg-5 container">
 
-    <div class="py-5 d-flex justify-content-center">
+    <div class="py-3 py-lg-5 d-flex justify-content-center">
         <h3>Mi perfil</h3>
     </div>
 
@@ -40,7 +40,7 @@
             <form method="post" id="updateProfile">
                 <div class="card-body p-4">
                     <div class="">
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between flex-column-reverse flex-lg-row">
                             <div>
                                 <div class="mb-3 mt-3">
                                     <input type="hidden" id="actual-username" value="<?php echo $_SESSION['PSESSION']['username']; ?>">
