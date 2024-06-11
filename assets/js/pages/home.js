@@ -2,13 +2,32 @@ let currentOffset = 0;
 const limit = 15;
 let responseOffset = 0;
 const responseLimit = 15;
+const queryParams = getQueryParams();
+const typesearchs = {
+    "teacher": "profesor",
+    "subject": "asignatura",
+    "school": "escuela"
+};
+
 $(function () {
 
-    realodOpinions();
+    if (!isEmpty(queryParams)) {
+        realodOpinions(1, false, queryParams['type'], queryParams['text']);
+        $("#title-opinions").html("Resultados de la búsqueda <span style='color:darkred;'>" + queryParams['text'] + "</span> para <span style='color:darkred;'>" + typesearchs[queryParams['type']] + "</span>");
+        $("#btn-deleteSearch").removeClass("d-none");
+    } else {
+        realodOpinions(1, false);
+    }
 
     $("#show-more").on("click", function() {
         currentOffset += limit;
-        realodOpinions(1, true);
+        const queryParams = getQueryParams();
+        if (queryParams != {}) {
+            realodOpinions(1, true, queryParams['type'],queryParams['text']);
+        } else {
+            realodOpinions(1, true);
+        }
+        
     });
 
     $("#id_form_grading").val(4);
@@ -47,12 +66,27 @@ $(function () {
         });
     });
 
+    // ENVIAR BÚSQUEDA
+    $("#search-form").on("submit", async function (event) {
+        event.preventDefault();
+        const text = $("#search-text").val();
+        const type = $("#search-type").val();
+        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?type=' + encodeURIComponent(type) + '&text=' + encodeURIComponent(text);
+        window.history.pushState({ path: newUrl }, '', newUrl);
+        var queryParams = getQueryParams();
+        realodOpinions(1, false, queryParams['type'], queryParams['text']);
+
+        $("#title-opinions").html("Resultados de la búsqueda <span style='color:darkred;'>" + queryParams['text'] + "</span> para <span style='color:darkred;'>" + typesearchs[queryParams['type']] + "</span>");
+        $("#btn-deleteSearch").removeClass("d-none");
+        console.log("Se realizó la búsqueda");
+        
+    });
 
 });
 
 function sendFormResponse(id,event) {
     event.preventDefault();
-    $("#responseForm"+id+" .btn-load").show();
+    loadBtn("op-btnSend");
     var formData = new FormData($("#responseForm"+id)[0]);
     if ($("#responseForm"+id+" .img")[0].files[0]) {
         var file = $("#responseForm"+id+" .img")[0].files[0];
@@ -74,7 +108,7 @@ function sendFormResponse(id,event) {
                 message("Algo salió mal", "error");
                 console.log(data);
             }
-            $("#responseForm"+id+" .btn-load").hide();
+            unLoadBtn("op-btnSend",'Enviar');
             
         }).catch(function (error) {
             message("Algo salió mal", "error");
@@ -83,7 +117,7 @@ function sendFormResponse(id,event) {
     });
 }
 
-async function realodOpinions(type = 1, append = false) {
+async function realodOpinions(type = 1, append = false, typesearch = "", textsearch = "") {
     $("#btn-show-more").hide();
     if (!append) {
         $("#show-opinions").html('<div class="spinner-border text-muted"></div>');
@@ -93,7 +127,14 @@ async function realodOpinions(type = 1, append = false) {
     }
 
     try {
-        var res = await sendAjax({ type: type, limit: limit, offset: currentOffset }, 'LOADOPINIONS');
+        var res = await sendAjax({ type: type, limit: limit, offset: currentOffset, typesearch: typesearch, textsearch: textsearch }, 'LOADOPINIONS');
+        console.log(res);
+        if (res == 4) {
+            message("La búsqueda tiene carácteres inválidos", "error");
+            $("#show-opinions").html("<span class='text-muted text-center'>Error en la búsqueda</span>");
+            $("#search-form")[0].reset();
+            return false;
+        }
         const opinions = JSON.parse(res);
         if (opinions != "") {
             console.log("Se han cargado las opiniones");
@@ -105,10 +146,15 @@ async function realodOpinions(type = 1, append = false) {
             $("#btn-show-more").show();
             dateFormatAll();
         } else {
-            $("#show-opinions").append("<span class='text-muted text-center'>No hay más opiniones</span>");
+            if (append) {
+                $("#show-opinions").append("<span class='text-muted text-center'>No hay más opiniones</span>");
+            } else {
+                $("#show-opinions").html("<span class='text-muted text-center'>No hay opiniones</span>");
+            }    
             $("#show-more").hide();
         }
         $("#show-more").html('Ver más');
+        return true;
     } catch (error) {
         console.error(error);
         message("Algo salió mal","error");

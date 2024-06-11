@@ -68,7 +68,7 @@
                     </div>
 
                     <div class="text-center">
-                        <button class="btn btn-primary mt-3 d-flex gap-2 align-items-center" type="submit"><div class="spinner-border spinner-border-sm btn-load"></div><span>Enviar opinión</span></button>
+                        <button class="btn btn-primary mt-3" type="submit" id="op-btnSend">Enviar opinión</button>
                     </div>
                 </form>
                 <hr class="line">
@@ -82,24 +82,26 @@
         <?php } ?>
 
         <div class="p-4 box-search">
-            <div class="input-group">
-                <input type="text" class="form-control" id="search-input" placeholder="Buscar...">
-                <div class="form-select-content">
-                    <select class="form-select">
-                        <option>Profesor</option>
-                        <option>Escuela</option>
-                        <option>Asignatura</option>
-                    </select>
+            <form method="post" id="search-form">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="text" id="search-text" placeholder="Buscar...">
+                    <div class="form-select-content">
+                        <select class="form-select" name="typesearch" id="search-type">
+                            <option value="teacher">Profesor</option>
+                            <option value="school">Escuela</option>
+                            <option value="subject">Asignatura</option>
+                        </select>
+                    </div>
+                    <button class="input-group-text btn-primary" type="submit" id="search-btnSend">Buscar</button>
                 </div>
-                <span class="input-group-text btn-primary">Buscar</span>
-            </div>
+            </form>
         </div>
 
         <section class="box-comments">
             <div class="container my-5 text-body">
 
                 <div class="text-center pb-3">
-                    <p class="text-primary"><span>últimas opiniones</span> <span class="btn-icon" onclick="realodOpinions()"><i class="fa-solid fa-arrows-rotate"></i></span></p>
+                    <p class="text-primary"><span id="title-opinions">últimas opiniones</span> <span class="btn-icon" onclick="realodOpinions()" title="Recargar resultados"><i class="fa-solid fa-arrows-rotate"></i></span><span class="text-danger ms-2 btn-icon d-none" title="Eliminar búsqueda" id="btn-deleteSearch" onclick="reloadWithoutParams()"><i class="fa-solid fa-xmark"></i></span></p>
                 </div>
 
                 <div class="row d-flex justify-content-center flex-wrap flex-column align-items-center" id="show-opinions"></div>

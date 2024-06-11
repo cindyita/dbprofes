@@ -321,3 +321,53 @@ function unLoadBtn(id,text = "Enviar") {
   $("#" + id).html(text);
   $("#" + id).prop("disabled", false);
 }
+
+// function sendForm(id, action = 'GET', img = "") {
+//     return new Promise((resolve, reject) => {
+
+//         $("#" + id).off("submit").on("submit", async function (event) {
+//             event.preventDefault();
+//             const textBtn = $("#" + id + " button[type=submit]").text();
+//             $("#" + id + " button[type=submit]").html('<div class="spinner-border text-muted"></div>');
+//             var formData = new FormData($(this)[0]);
+//             if (img != "") {
+//                 if ($("#" + img)[0].files[0]) {
+//                     var file = $("#" + img)[0].files[0];
+//                     formData.append('file', file);
+//                 }
+//             }
+//             try {
+//                 const res = await sendAjaxForm(formData, action);
+//                 const parsedRes = JSON.parse(res);
+//                 if (parsedRes == 1) {
+//                     $(this).trigger('reset');
+//                     resolve(parsedRes);
+//                 } else {
+//                     message("Algo salió mal", "error");
+//                     console.log(parsedRes);
+//                     reject(parsedRes);
+//                 }
+//             } catch (error) {
+//                 message("Algo salió mal", "error");
+//                 console.error(error);
+//                 reject(error);
+//             } finally {
+//                 $("#" + id + " button[type=submit]").html(textBtn);
+//             }
+//         });
+//     });
+// }
+
+function getQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+  return Object.fromEntries(params.entries()) ?? false;
+}
+
+function isEmpty(obj) {
+    return Object.entries(obj).length === 0;
+}
+
+function reloadWithoutParams() {
+    const url = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.location.replace(url);
+}
