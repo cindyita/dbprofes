@@ -97,7 +97,7 @@ function postOpinion() {
         $row = $db->query("INSERT INTO POST_OPINION($setQueryParams) VALUES($setQueryValues)",$params);
     }
 
-    if($_FILES['img']){
+    if($_FILES && $_FILES['img'] && $_FILES['img']['size'] != 0){
         $numFiles = is_array($_FILES['img']['name']);
         $numImg = 0;
 
@@ -139,17 +139,35 @@ function deleteOpinion(){
     if (isset($_SESSION['PSESSION']) && ($_SESSION['PSESSION']['id'] == $id_user || $_SESSION['PSESSION']['id_role'] <= 2)) {
 
         $ruta = '../../../assets/img/posts/'.$id.'/';
-            if (!file_exists($ruta)) {
-                $files = glob($ruta . '*');
-                foreach ($files as $file) {
-                    if (is_file($file)) {
-                        unlink($file);
+        if (!file_exists($ruta)) {
+            $files = glob($ruta . '*');
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                }
+            }
+        }
+        $db->query("DELETE FROM POST_IMG WHERE id_opinion_response = :id_opinion AND type_opinion = 1",[':id_opinion'=>$id]);
+
+        //------------------------------------------------
+        $responses = $db->select("POST_RESPONSE","id_opinion = $id");
+        if($responses){
+            foreach ($responses as $value) {
+                $ruta = '../../../assets/img/responses/'.$value['id'].'/';
+                if (!file_exists($ruta)) {
+                    $files = glob($ruta . '*');
+                    foreach ($files as $file) {
+                        if (is_file($file)) {
+                            unlink($file);
+                        }
                     }
                 }
             }
-            
-        $db->query("DELETE FROM POST_IMG WHERE id_opinion_response = :id_opinion AND type_opinion = 1",[':id_opinion'=>$id]);
-    
+            $db->query("DELETE FROM POST_IMG WHERE id_opinion_response = :id_opinion AND type_opinion = 2",[':id_opinion'=>$id]);
+            $row = $db->query("DELETE FROM POST_RESPONSE WHERE id_opinion = :id",[":id"=>$id]);
+        }
+        //-------------------------------------------------
+
         $row = $db->query("DELETE FROM POST_OPINION WHERE id = :id",[":id"=>$data['id']]);
         if($row == []){
             echo 1;
@@ -210,7 +228,7 @@ function updateOpinion(){
 
         $fields = dataInQuery($data);
         
-        if($_FILES && isset($_FILES['img'])){
+        if($_FILES && $_FILES['img']['size'] != 0){
             $numFiles = is_array($_FILES['img']['name']);
             $ruta = '../../../assets/img/posts/'.$id.'/';
             if (!file_exists($ruta)) {
@@ -283,7 +301,7 @@ function updateResponse(){
 
         $fields = dataInQuery($data);
         
-        if($_FILES && isset($_FILES['images'])){
+        if($_FILES && $_FILES['img']['size'] != 0){
             $numFiles = is_array($_FILES['images']['name']);
             $ruta = '../../../assets/img/responses/'.$id.'/';
             if (!file_exists($ruta)) {
@@ -675,7 +693,7 @@ function postResponse(){
         $row = $db->query("INSERT INTO POST_RESPONSE($setQueryParams) VALUES($setQueryValues)",$params);
     }
 
-    if($_FILES['img']){
+    if($_FILES && $_FILES['img'] && $_FILES['img']['size'] != 0){
         $numFiles = is_array($_FILES['img']['name']);
         $numImg = 0;
 
