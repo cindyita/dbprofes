@@ -273,7 +273,7 @@ function handleFileImage(files, previewId) {
     reader.readAsDataURL(file);
 }
 
-function handleFileImages(files, previewId) {
+function handleFileImages(files, previewId,typePost = 'opinion',modePost = 'post') {
     const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff"];
     var previewContainer = $("#" + previewId);
     previewContainer.empty();
@@ -291,72 +291,20 @@ function handleFileImages(files, previewId) {
         if (allowedExtensions.indexOf(fileExtension) === -1) {
             message("El archivo '" + file.name + "' tiene una extensión no permitida","error");
             return;
-        }
-
-        var reader = new FileReader();
-      reader.onload = function (e) {
-            var img = $("<img />", {
-                src: e.target.result,
-                class: "img-preview",
-                width: "120px"
-            });
-            var imgContainer = $("<div></div>", {
-                class: "img-container"
-            });
-            imgContainer.append(img);
-            previewContainer.append(imgContainer);
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-function handleFileImagesOpinion(files, previewId) {
-    const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff"];
-    var previewContainer = $("#" + previewId);
-    previewContainer.empty();
-
-    Array.from(files).forEach(file => {
-        var fileExtension = file.name.split(".").pop().toLowerCase();
-        if (allowedExtensions.indexOf(fileExtension) === -1) {
-            alert("El archivo '" + file.name + "' tiene una extensión no permitida");
-            return;
-        }
-
+      }
+      
+      if (typePost == 'opinion' && modePost == 'post') {
         imagesOpinion[file.name] = file;
-
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            var img = $("<img />", {
-                src: e.target.result,
-                class: "img-preview",
-                width: "120px"
-            });
-            var imgContainer = $("<div></div>", {
-                class: "img-container"
-            });
-            imgContainer.append(img);
-            previewContainer.append(imgContainer);
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-function handleFileImagesResponse(files, previewId) {
-    const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff"];
-    var previewContainer = $("#" + previewId);
-    previewContainer.empty();
-
-    Array.from(files).forEach(file => {
-        var fileExtension = file.name.split(".").pop().toLowerCase();
-        if (allowedExtensions.indexOf(fileExtension) === -1) {
-            alert("El archivo '" + file.name + "' tiene una extensión no permitida");
-            return;
-        }
-
+      } else if(typePost == 'opinion' && modePost == 'edit') {
+        imagesEditOpinion[file.name] = file;
+      } else if(typePost == 'response' && modePost == 'post') {
         imagesResponse[file.name] = file;
+      } else if(typePost == 'response' && modePost == 'edit') {
+        imagesEditResponse[file.name] = file;
+      }
 
-        var reader = new FileReader();
-        reader.onload = function (e) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
             var img = $("<img />", {
                 src: e.target.result,
                 class: "img-preview",

@@ -59,7 +59,7 @@
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="img" class="form-label">Imagenes: (Selecciona varias imagenes con ctrl + click)</label>
-                        <input type="file" class="form-control" name="img" id="img" onchange="handleFileImages(this.files, 'preview')" multiple>
+                        <input type="file" class="form-control" name="img" id="img" onchange="handleFileImages(this.files, 'preview','opinion','post')" multiple>
                         <div id="preview" class="d-flex gap-2 flex-wrap py-3"></div>
                     </div>
                     <div class="form-check mb-3">
@@ -214,7 +214,7 @@
                 </div>
                 <div class="mb-3 mt-3">
                     <label for="editOpinionModal-img" class="form-label">Resubir imagenes: (Selecciona varias imagenes con ctrl + click) (Si subes imagenes, se borrarán las anteriores).</label>
-                    <input type="file" class="form-control" name="editimg" id="editOpinionModal-img" onchange="handleFileImagesOpinion(this.files, 'editOpinionModal-preview')" multiple>
+                    <input type="file" class="form-control" name="editimg" id="editOpinionModal-img" onchange="handleFileImages(this.files, 'editOpinionModal-preview','opinion','edit')" multiple>
                     <div id="editOpinionModal-preview" class="d-flex gap-2 flex-wrap py-3"></div>
                 </div>
                 <div class="form-check mb-3">
@@ -277,7 +277,7 @@
                 </div>
                 <div class="mb-3 mt-3">
                     <label for="img" class="form-label">Imagenes: (Selecciona varias imagenes con ctrl + click)</label>
-                    <input type="file" class="form-control img" name="editResponseModal-img" id="editResponseModal-img" onchange="handleFileImagesResponse(this.files, 'editResponseModal-preview')" multiple>
+                    <input type="file" class="form-control img" name="editResponseModal-img" id="editResponseModal-img" onchange="handleFileImages(this.files, 'editResponseModal-preview','response','edit')" multiple>
                     <div id="editResponseModal-preview" class="d-flex gap-2 flex-wrap py-3"></div>
                 </div>
                 <div class="form-check mb-3">

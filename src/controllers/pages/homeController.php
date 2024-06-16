@@ -106,11 +106,13 @@ function postOpinion() {
         if($numFiles){
             $img = createMultiFiles('img',$ruta,"",0);
             $numImg = count($_FILES['img']['name']);
+            $img = call_user_func_array('array_merge', $img);
             $nameImgs = implode(',', $img);
             $queryimg = $db->query("INSERT INTO POST_IMG(img,type_opinion,id_opinion_response,num_img) VALUES(:img,1,:id_opinion,:num_img)",[":img"=>$nameImgs,":id_opinion"=>$idPost,":num_img"=>$numImg]);
         }else{
             $img = createFile('img',$ruta,"",0);
             $numImg = 1;
+            $img = call_user_func_array('array_merge', $img);
             $queryimg = $db->query("INSERT INTO POST_IMG(img,type_opinion,id_opinion_response,num_img) VALUES(:img,1,:id_opinion,1)",[":img"=>$img,":id_opinion"=>$idPost]);
         }
         if($img == 6){
@@ -135,6 +137,18 @@ function deleteOpinion(){
     $id_user = $db->value("POST_OPINION","id = $id","id_user");
 
     if (isset($_SESSION['PSESSION']) && ($_SESSION['PSESSION']['id'] == $id_user || $_SESSION['PSESSION']['id_role'] <= 2)) {
+
+        $ruta = '../../../assets/img/posts/'.$id.'/';
+            if (!file_exists($ruta)) {
+                $files = glob($ruta . '*');
+                foreach ($files as $file) {
+                    if (is_file($file)) {
+                        unlink($file);
+                    }
+                }
+            }
+            
+        $db->query("DELETE FROM POST_IMG WHERE id_opinion_response = :id_opinion AND type_opinion = 1",[':id_opinion'=>$id]);
     
         $row = $db->query("DELETE FROM POST_OPINION WHERE id = :id",[":id"=>$data['id']]);
         if($row == []){
@@ -155,6 +169,18 @@ function deleteResponse(){
     $id_user = $db->value("POST_RESPONSE","id = $id","id_user");
 
     if (isset($_SESSION['PSESSION']) && ($_SESSION['PSESSION']['id'] == $id_user || $_SESSION['PSESSION']['id_role'] <= 2)) {
+
+        $ruta = '../../../assets/img/responses/'.$id.'/';
+            if (!file_exists($ruta)) {
+                $files = glob($ruta . '*');
+                foreach ($files as $file) {
+                    if (is_file($file)) {
+                        unlink($file);
+                    }
+                }
+            }
+            
+        $db->query("DELETE FROM POST_IMG WHERE id_opinion_response = :id_opinion AND type_opinion = 2",[':id_opinion'=>$id]);
         
         $row = $db->query("DELETE FROM POST_RESPONSE WHERE id = :id",[":id"=>$id]);
         if($row == []){
@@ -184,8 +210,8 @@ function updateOpinion(){
 
         $fields = dataInQuery($data);
         
-        if($_FILES && isset($_FILES['images'])){
-            $numFiles = is_array($_FILES['images']['name']);
+        if($_FILES && isset($_FILES['img'])){
+            $numFiles = is_array($_FILES['img']['name']);
             $ruta = '../../../assets/img/posts/'.$id.'/';
             if (!file_exists($ruta)) {
                 mkdir($ruta, 0777, true);
@@ -198,12 +224,12 @@ function updateOpinion(){
             }
             $imgs = "";
             if($numFiles){
-                $img = createMultiFiles('images',$ruta,"",0);
-                $numImg = count($_FILES['images']['name']);
+                $img = createMultiFiles('img',$ruta,"",0);
+                $numImg = count($_FILES['img']['name']);
                 $img = call_user_func_array('array_merge', $img);
                 $imgs = implode(',', $img);
             }else{
-                $img = createFile('images',$ruta,"",0);
+                $img = createFile('img',$ruta,"",0);
                 $numImg = 1;
                 $img = call_user_func_array('array_merge', $img);
                 $imgs = $img;
@@ -309,7 +335,7 @@ function updateResponse(){
         }else{
             echo json_encode($row);
         }
-        
+
     }else{
         echo json_encode("No tienes permisos para esta acción");
     }
@@ -504,7 +530,7 @@ function loadOpinions(){
                                             </div>
                                             <div class="mb-3 mt-3">
                                                 <label for="img" class="form-label">Imagenes: (Selecciona varias imagenes con ctrl + click)</label>
-                                                <input type="file" class="form-control img" name="img" onchange="handleFileImages(this.files, \'previewImage'.$value['id'].'\')" multiple>
+                                                <input type="file" class="form-control img" name="img" onchange="handleFileImages(this.files, \'previewImage'.$value['id'].'\',\'response\',\'post\')" multiple>
                                                 <div id="previewImage'.$value['id'].'" class="d-flex gap-2 flex-wrap py-3"></div>
                                             </div>
                                             <div class="form-check mb-3">
@@ -658,11 +684,13 @@ function postResponse(){
         if($numFiles){
             $img = createMultiFiles('img',$ruta,"",0);
             $numImg = count($_FILES['img']['name']);
+            $img = call_user_func_array('array_merge', $img);
             $nameImgs = implode(',', $img);
             $queryimg = $db->query("INSERT INTO POST_IMG(img,type_opinion,id_opinion_response,num_img) VALUES(:img,2,:id_opinion,:num_img)",[":img"=>$nameImgs,":id_opinion"=>$idResponse,":num_img"=>$numImg]);
         }else{
             $img = createFile('img',$ruta,"",0);
             $numImg = 1;
+            $img = call_user_func_array('array_merge', $img);
             $queryimg = $db->query("INSERT INTO POST_IMG(img,type_opinion,id_opinion_response,num_img) VALUES(:img,2,:id_opinion,1)",[":img"=>$img,":id_opinion"=>$idResponse]);
         }
         if($img == 6){

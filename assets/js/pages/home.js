@@ -10,6 +10,8 @@ const typesearchs = {
 };
 let imagesOpinion = {};
 let imagesResponse = {};
+let imagesEditOpinion = {};
+let imagesEditResponse = {};
 
 $(function () {
     
@@ -60,12 +62,19 @@ $(function () {
         event.preventDefault();
         $("#opinionForm .btn-load").show();
         var formData = new FormData($("#opinionForm")[0]);
+        // if ($("#img")[0].files[0]) {
+        //     var file = $("#img")[0].files[0];
+        //     formData.append('file', file);
+        // }
         if ($("#img")[0].files[0]) {
-            var file = $("#img")[0].files[0];
-            formData.append('file', file);
+            for (var key in imagesOpinion) {
+                formData.append('img[]', imagesOpinion[key]);
+            }
         }
+        images = {};
         sendAjaxForm(formData, 'POST').then(
             function (res) {
+                console.log(res);
                 res = JSON.parse(res);
                 if (res == 1) {
                     message("Se ha agregado tu opinión", "success");
@@ -134,8 +143,11 @@ $(function () {
         var form = this;
         loadBtnForm(form);
         var formData = new FormData($("#editOpinionForm")[0]);
-        for(var key in imagesOpinion) {
-            formData.append('images[]', imagesOpinion[key]);
+        
+        if ($("#editOpinionModal-img")[0].files[0]) {
+            for (var key in imagesEditOpinion) {
+                formData.append('img[]', imagesEditOpinion[key]);
+            }
         }
 
         sendAjaxForm(formData, 'UPDATE').then(
@@ -158,8 +170,10 @@ $(function () {
         var id_opinion = $("#editResponseModal-id_opinion").val();
         loadBtnForm(form);
         var formData = new FormData($("#editResponseForm")[0]);
-        for(var key in imagesResponse) {
-            formData.append('images[]', imagesResponse[key]);
+        if ($("#editResponseModal-img")[0].files[0]) {
+            for (var key in imagesEditResponse) {
+                formData.append('img[]', imagesEditResponse[key]);
+            }
         }
 
         sendAjaxForm(formData, 'UPDATERESPONSE').then(
@@ -206,10 +220,16 @@ function sendFormResponse(id,event) {
     event.preventDefault();
     loadBtn("op-btnSend");
     var formData = new FormData($("#responseForm"+id)[0]);
-    if ($("#responseForm"+id+" .img")[0].files[0]) {
-        var file = $("#responseForm"+id+" .img")[0].files[0];
-        formData.append('file', file);
+    // if ($("#responseForm"+id+" .img")[0].files[0]) {
+    //     var file = $("#responseForm"+id+" .img")[0].files[0];
+    //     formData.append('file', file);
+    // }
+    if ($("#responseForm" + id + " .img")[0].files[0]) {
+        for (var key in imagesResponse) {
+            formData.append('img[]', imagesResponse[key]);
+        }
     }
+    images = {};
     sendAjaxForm(formData, 'POSTRESPONSE').then(
         function (res) {
             console.log(res);

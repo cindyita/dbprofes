@@ -109,7 +109,6 @@ class PagesController
 
     // PÁGINA PERFIL
     public static function user() {
-        self::checkSession();
         if(isset($_GET) && isset($_GET['id'])){
             $iduser = $_GET['id'];
             $db = new QueryModel();
