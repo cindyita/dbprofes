@@ -131,22 +131,40 @@ function postOpinion() {
 function deleteOpinion(){
     $data = getPostData();
     $db = new QueryModel();
-    $row = $db->query("DELETE FROM POST_OPINION WHERE id = :id",[":id"=>$data['id']]);
-    if($row == []){
-        echo 1;
+    $id = $data['id'];
+    $id_user = $db->value("POST_OPINION","id = $id","id_user");
+
+    if (isset($_SESSION['PSESSION']) && ($_SESSION['PSESSION']['id'] == $id_user || $_SESSION['PSESSION']['id_role'] <= 2)) {
+    
+        $row = $db->query("DELETE FROM POST_OPINION WHERE id = :id",[":id"=>$data['id']]);
+        if($row == []){
+            echo 1;
+        }else{
+            echo json_encode($row);
+        }
+
     }else{
-        echo json_encode($row);
+        echo json_encode("No tienes permisos para esta acción");
     }
 }
 
 function deleteResponse(){
     $data = getPostData();
     $db = new QueryModel();
-    $row = $db->query("DELETE FROM POST_RESPONSE WHERE id = :id",[":id"=>$data['id']]);
-    if($row == []){
-        echo 1;
+    $id = $data['id'];
+    $id_user = $db->value("POST_RESPONSE","id = $id","id_user");
+
+    if (isset($_SESSION['PSESSION']) && ($_SESSION['PSESSION']['id'] == $id_user || $_SESSION['PSESSION']['id_role'] <= 2)) {
+        
+        $row = $db->query("DELETE FROM POST_RESPONSE WHERE id = :id",[":id"=>$id]);
+        if($row == []){
+            echo 1;
+        }else{
+            echo json_encode($row);
+        }
+
     }else{
-        echo json_encode($row);
+        echo json_encode("No tienes permisos para esta acción");
     }
 }
 
@@ -154,66 +172,72 @@ function updateOpinion(){
     $data = getPostData();
     $db = new QueryModel();
     $id = $data['id'];
+    $id_user = $db->value("POST_OPINION","id = $id","id_user");
 
-    if(isset($data['anonymous']) && $data['anonymous'] == "on"){
-        $data['anonymous'] = 1;
-    }else if(isset($data['anonymous'])){
-        $data['anonymous'] = 0;
-    }
+    if (isset($_SESSION['PSESSION']) && ($_SESSION['PSESSION']['id'] == $id_user || $_SESSION['PSESSION']['id_role'] <= 2)) {
 
-    $fields = dataInQuery($data);
-    
-    if($_FILES && isset($_FILES['images'])){
-        $numFiles = is_array($_FILES['images']['name']);
-        $ruta = '../../../assets/img/posts/'.$id.'/';
-        if (!file_exists($ruta)) {
-            mkdir($ruta, 0777, true);
+        if(isset($data['anonymous']) && $data['anonymous'] == "on"){
+            $data['anonymous'] = 1;
+        }else if(isset($data['anonymous'])){
+            $data['anonymous'] = 0;
         }
-        $files = glob($ruta . '*');
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                unlink($file);
+
+        $fields = dataInQuery($data);
+        
+        if($_FILES && isset($_FILES['images'])){
+            $numFiles = is_array($_FILES['images']['name']);
+            $ruta = '../../../assets/img/posts/'.$id.'/';
+            if (!file_exists($ruta)) {
+                mkdir($ruta, 0777, true);
+            }
+            $files = glob($ruta . '*');
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                }
+            }
+            $imgs = "";
+            if($numFiles){
+                $img = createMultiFiles('images',$ruta,"",0);
+                $numImg = count($_FILES['images']['name']);
+                $img = call_user_func_array('array_merge', $img);
+                $imgs = implode(',', $img);
+            }else{
+                $img = createFile('images',$ruta,"",0);
+                $numImg = 1;
+                $img = call_user_func_array('array_merge', $img);
+                $imgs = $img;
+            }
+            if($img == 6){
+                echo 6;
+                return;
+            }
+            $fields['num_img'] = $numImg;
+            $db->query("DELETE FROM POST_IMG WHERE id_opinion_response = :id_opinion AND type_opinion = 1",[':id_opinion'=>$id]);
+            $db->query("INSERT INTO POST_IMG(img,type_opinion,id_opinion_response,num_img) VALUES(:img,1,:id_opinion,:num_img)",[":img"=>$imgs,":id_opinion"=>$id,":num_img"=>$numImg]);
+        }
+
+        $setParams = [];
+        $params = [":id"=>$id];
+        foreach ($fields as $key => $value) {
+            if ($value !== null) {
+                $setParams[] = "$key = :$key";
+                $params[":$key"] = $value;
             }
         }
-        $imgs = "";
-        if($numFiles){
-            $img = createMultiFiles('images',$ruta,"",0);
-            $numImg = count($_FILES['images']['name']);
-            $img = call_user_func_array('array_merge', $img);
-            $imgs = implode(',', $img);
+
+        if (!empty($setParams)) {
+            $setQuery = implode(', ', $setParams);
+            $row = $db->query("UPDATE POST_OPINION SET $setQuery WHERE id=:id",$params);
+        }
+
+        if($row == []){
+            echo 1;
         }else{
-            $img = createFile('images',$ruta,"",0);
-            $numImg = 1;
-            $img = call_user_func_array('array_merge', $img);
-            $imgs = $img;
+            echo json_encode($row);
         }
-        if($img == 6){
-            echo 6;
-            return;
-        }
-        $fields['num_img'] = $numImg;
-        $db->query("DELETE FROM POST_IMG WHERE id_opinion_response = :id_opinion AND type_opinion = 1",[':id_opinion'=>$id]);
-        $db->query("INSERT INTO POST_IMG(img,type_opinion,id_opinion_response,num_img) VALUES(:img,1,:id_opinion,:num_img)",[":img"=>$imgs,":id_opinion"=>$id,":num_img"=>$numImg]);
-    }
-
-    $setParams = [];
-    $params = [":id"=>$id];
-    foreach ($fields as $key => $value) {
-        if ($value !== null) {
-            $setParams[] = "$key = :$key";
-            $params[":$key"] = $value;
-        }
-    }
-
-    if (!empty($setParams)) {
-        $setQuery = implode(', ', $setParams);
-        $row = $db->query("UPDATE POST_OPINION SET $setQuery WHERE id=:id",$params);
-    }
-
-    if($row == []){
-        echo 1;
     }else{
-        echo json_encode($row);
+        echo json_encode("No tienes permisos para esta acción");
     }
 }
 
@@ -221,66 +245,73 @@ function updateResponse(){
     $data = getPostData();
     $db = new QueryModel();
     $id = $data['id'];
+    $id_user = $db->value("POST_RESPONSE","id = $id","id_user");
 
-    if(isset($data['anonymous']) && $data['anonymous'] == "on"){
-        $data['anonymous'] = 1;
-    }else if(isset($data['anonymous'])){
-        $data['anonymous'] = 0;
-    }
-
-    $fields = dataInQuery($data);
+    if (isset($_SESSION['PSESSION']) && ($_SESSION['PSESSION']['id'] == $id_user || $_SESSION['PSESSION']['id_role'] <= 2)) {
     
-    if($_FILES && isset($_FILES['images'])){
-        $numFiles = is_array($_FILES['images']['name']);
-        $ruta = '../../../assets/img/responses/'.$id.'/';
-        if (!file_exists($ruta)) {
-            mkdir($ruta, 0777, true);
+        if(isset($data['anonymous']) && $data['anonymous'] == "on"){
+            $data['anonymous'] = 1;
+        }else if(isset($data['anonymous'])){
+            $data['anonymous'] = 0;
         }
-        $files = glob($ruta . '*');
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                unlink($file);
+
+        $fields = dataInQuery($data);
+        
+        if($_FILES && isset($_FILES['images'])){
+            $numFiles = is_array($_FILES['images']['name']);
+            $ruta = '../../../assets/img/responses/'.$id.'/';
+            if (!file_exists($ruta)) {
+                mkdir($ruta, 0777, true);
+            }
+            $files = glob($ruta . '*');
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                }
+            }
+            $imgs = "";
+            if($numFiles){
+                $img = createMultiFiles('images',$ruta,"",0);
+                $numImg = count($_FILES['images']['name']);
+                $img = call_user_func_array('array_merge', $img);
+                $imgs = implode(',', $img);
+            }else{
+                $img = createFile('images',$ruta,"",0);
+                $numImg = 1;
+                $img = call_user_func_array('array_merge', $img);
+                $imgs = $img;
+            }
+            if($img == 6){
+                echo 6;
+                return;
+            }
+            $fields['num_img'] = $numImg;
+            $db->query("DELETE FROM POST_IMG WHERE id_opinion_response = :id_opinion AND type_opinion = 2",[':id_opinion'=>$id]);
+            $db->query("INSERT INTO POST_IMG(img,type_opinion,id_opinion_response,num_img) VALUES(:img,2,:id_opinion,:num_img)",[":img"=>$imgs,":id_opinion"=>$id,":num_img"=>$numImg]);
+        }
+
+        $setParams = [];
+        $params = [":id"=>$id];
+        foreach ($fields as $key => $value) {
+            if ($value !== null) {
+                $setParams[] = "$key = :$key";
+                $params[":$key"] = $value;
             }
         }
-        $imgs = "";
-        if($numFiles){
-            $img = createMultiFiles('images',$ruta,"",0);
-            $numImg = count($_FILES['images']['name']);
-            $img = call_user_func_array('array_merge', $img);
-            $imgs = implode(',', $img);
+
+        if (!empty($setParams)) {
+            $setQuery = implode(', ', $setParams);
+            $row = $db->query("UPDATE POST_RESPONSE SET $setQuery WHERE id=:id",$params);
+        }
+
+        if($row == []){
+            echo 1;
         }else{
-            $img = createFile('images',$ruta,"",0);
-            $numImg = 1;
-            $img = call_user_func_array('array_merge', $img);
-            $imgs = $img;
+            echo json_encode($row);
         }
-        if($img == 6){
-            echo 6;
-            return;
-        }
-        $fields['num_img'] = $numImg;
-        $db->query("DELETE FROM POST_IMG WHERE id_opinion_response = :id_opinion AND type_opinion = 2",[':id_opinion'=>$id]);
-        $db->query("INSERT INTO POST_IMG(img,type_opinion,id_opinion_response,num_img) VALUES(:img,2,:id_opinion,:num_img)",[":img"=>$imgs,":id_opinion"=>$id,":num_img"=>$numImg]);
-    }
-
-    $setParams = [];
-    $params = [":id"=>$id];
-    foreach ($fields as $key => $value) {
-        if ($value !== null) {
-            $setParams[] = "$key = :$key";
-            $params[":$key"] = $value;
-        }
-    }
-
-    if (!empty($setParams)) {
-        $setQuery = implode(', ', $setParams);
-        $row = $db->query("UPDATE POST_RESPONSE SET $setQuery WHERE id=:id",$params);
-    }
-
-    if($row == []){
-        echo 1;
+        
     }else{
-        echo json_encode($row);
+        echo json_encode("No tienes permisos para esta acción");
     }
 }
 
