@@ -12,13 +12,20 @@
     <link rel="shortcut icon" href="./assets/img/system/favicon.png" type="image/PNG">
 
     <!-----------ReCaptcha------------>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <?php if($_ENV['DISABLE_CAPTCHA'] != "true"){ ?>
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <?php } ?>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <script src="https://kit.fontawesome.com/e0df5df9e9.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
 
     <link rel="stylesheet" href="./assets/css/app.css?version=<?php echo VERSION; ?>">
     <link rel="stylesheet" href="./assets/css/theme.css?version=<?php echo VERSION; ?>">
+
+    <link rel="stylesheet" href="./assets/required/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="./assets/required/fontawesome/css/brands.min.css">
+    <link rel="stylesheet" href="./assets/required/fontawesome/css/solid.min.css">
+
+    <link rel="stylesheet" href="./assets/required/summernote/summernote-lite.min.css">
 
     <!-- Dark/light theme -->
     <script defer>

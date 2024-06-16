@@ -8,12 +8,39 @@ const typesearchs = {
     "subject": "asignatura",
     "school": "escuela"
 };
+let images = {};
+let imagesRes = {};
 
 $(function () {
+    
+    $("#opiniontext, #editOpinionModal-opinion").summernote({
+        placeholder: "Asegurate de mencionar datos que puedan ser útiles para otros estudiantes",
+        tabsize: 5,
+        height: 150,
+        lang: 'es-ES',
+        toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'underline', 'italic', 'clear', 'superscript']],
+            ['para', ['ul', 'ol']],
+            ['table', ['table']],
+            ['insert', ['link']],
+            ['view',['fullscreen','codeview','undo', 'redo']]
+        ],
+        disableDragAndDrop: true
+    });
+
 
     if (!isEmpty(queryParams)) {
         realodOpinions(1, false, queryParams['type'], queryParams['text']);
         $("#title-opinions").html("Resultados de la búsqueda <span style='color:darkred;'>" + queryParams['text'] + "</span> para <span style='color:darkred;'>" + typesearchs[queryParams['type']] + "</span>");
+        if (queryParams['type'] == 'my') {
+            $("#title-opinions").html("<span>Viendo: <span style='color:darkred;'>Mis opiniones</span></span>");
+        }
+            
+        if (queryParams['type'] == 'my') {
+            
+        }
+        
         $("#btn-deleteSearch").removeClass("d-none");
     } else {
         realodOpinions(1, false);
@@ -30,10 +57,6 @@ $(function () {
         
     });
 
-    $("#id_form_grading").val(4);
-    $("#id_time_grading").val(3);
-    $("#id_accessibility").val(3);
-
     $("#opinionForm").on("submit", async function (event) {
         event.preventDefault();
         $("#opinionForm .btn-load").show();
@@ -44,11 +67,18 @@ $(function () {
         }
         sendAjaxForm(formData, 'POST').then(
             function (res) {
-                console.log(res);
                 res = JSON.parse(res);
                 if (res == 1) {
                     message("Se ha agregado tu opinión", "success");
-                    $(this).reset();
+
+                    $("#id_form_grading").val(4);
+                    $("#id_time_grading").val(3);
+                    $("#id_accessibility").val(3);
+                    $(".note-editable").html("");
+                    $("#opiniontext").val("");
+                    $("#preview").html("");
+                    $("#opinionForm")[0].reset();
+
                     $("#opinion").removeClass("show");
                     realodOpinions();
                 } else if (res == 6) {
@@ -81,6 +111,52 @@ $(function () {
         console.log("Se realizó la búsqueda");
         
     });
+
+    $("#deleteOpinionModalForm").on("submit", function (event) {
+        event.preventDefault();
+        var form = this;
+        loadBtnForm(form);
+        var formData = new FormData($(this)[0]);
+        sendAjaxForm(formData, 'DELETE').then(
+            function (res) {
+                if (res == 1) {
+                    message("Se eliminó la opinión", "success");
+                    realodOpinions();
+                }
+                unLoadBtnForm(form);
+            }).catch(function (error) {
+                message("Algo salió mal", "error");
+                console.error(error);
+        });
+    });
+
+    $("#editOpinionForm").on("submit", function (event) {
+        event.preventDefault();
+        var form = this;
+        loadBtnForm(form);
+        var formData = new FormData($("#editOpinionForm")[0]);
+        console.log(images);
+        for(var key in images) {
+            formData.append('images[]', images[key]);
+        }
+
+        sendAjaxForm(formData, 'UPDATE').then(
+            function (res) {
+                console.log(res);
+                if (res == 1) {
+                    message("Se actualizó la opinión", "success");
+                    realodOpinions();
+                }
+                unLoadBtnForm(form);
+            }).catch(function (error) {
+                message("Algo salió mal", "error");
+                console.error(error);
+        });
+    });
+
+    $("#id_form_grading").val(4);
+    $("#id_time_grading").val(3);
+    $("#id_accessibility").val(3);
 
 });
 
@@ -117,132 +193,90 @@ function sendFormResponse(id,event) {
     });
 }
 
-async function realodOpinions(type = 1, append = false, typesearch = "", textsearch = "") {
-    $("#btn-show-more").hide();
-    if (!append) {
-        $("#show-opinions").html('<div class="spinner-border text-muted"></div>');
-    } else {
-        $("#btn-show-more").show();
-        $("#show-more").html('<div class="spinner-border text-muted"></div>');
-    }
 
-    try {
-        var res = await sendAjax({ type: type, limit: limit, offset: currentOffset, typesearch: typesearch, textsearch: textsearch }, 'LOADOPINIONS');
-        console.log(res);
-        if (res == 4) {
-            message("La búsqueda tiene carácteres inválidos", "error");
-            $("#show-opinions").html("<span class='text-muted text-center'>Error en la búsqueda</span>");
-            $("#search-form")[0].reset();
-            return false;
-        }
-        const opinions = JSON.parse(res);
-        if (opinions != "") {
-            console.log("Se han cargado las opiniones");
-            if (append) {
-                $("#show-opinions").append(opinions);
+
+function editOpinionModalText(id) {
+    $("#editOpinionModal-idText").text(id);
+    $("#editOpinionModal-id").val(id);
+    sendAjax({id: id}, 'GET').then(
+        function (res) {
+            var data = JSON.parse(res);
+            $("#editOpinionForm")[0].reset();
+            transposeData('editOpinionModal', data, true);
+            $("#editOpinionModal .note-placeholder").html("");
+            $("#editOpinionModal .note-editable").html(data['opinion']);
+            if (data['anonymous'] == 1) {
+                $("#editOpinionModal-anonymous").prop("checked", true);
             } else {
-                $("#show-opinions").html(opinions);
+                $("#editOpinionModal-anonymous").prop("checked", false);
             }
-            $("#btn-show-more").show();
-            dateFormatAll();
-        } else {
-            if (append) {
-                $("#show-opinions").append("<span class='text-muted text-center'>No hay más opiniones</span>");
-            } else {
-                $("#show-opinions").html("<span class='text-muted text-center'>No hay opiniones</span>");
-            }    
-            $("#show-more").hide();
-        }
-        $("#show-more").html('Ver más');
-        return true;
-    } catch (error) {
-        console.error(error);
-        message("Algo salió mal","error");
-        return false;
-    }
-}
-
-function ImagePostModal(id, img) {
-    $("#opImg-id").text(id);
-    $("#opImg-img").html('<img src="./assets/img/posts/'+id+'/'+img+'" width="100%">');
-}
-
-function ImageResponseModal(idopinion,id, img) {
-    $("#resImg-id").text('#'+idopinion+'#'+id);
-    $("#resImg-img").html('<img src="./assets/img/responses/'+id+'/'+img+'" width="100%">');
-}
-
-function collapseResponsesShow(id) {
-    var isShow = $("#responses" + id).hasClass("show");
-    return isShow;
-}
-
-async function showResponses(id, append = false) {
-    const responsesContainer = $("#responses" + id+"-content")
-
-    if (!append) {
-        responsesContainer.html('<div class="spinner-border text-muted"></div>');
-    } else {
-        $("#show-more-responses" + id).html('<div class="spinner-border text-muted"></div>');
-    }
-
-    try {
-        
-        var res = await sendAjax({ id: id, limit: responseLimit, offset: responseOffset }, 'LOADRESPONSES');
-        res = JSON.parse(res);
-        if (res) {
-            if (append) {
-                responsesContainer.append(res);
-            } else {
-                responsesContainer.html(res);
+            images = {};
+            $("#editOpinionModal-preview").html("");
+            $("#editOpinionModal-img").val("");
+            if (data['img'] != null) {
+                var imgs = data['img'].split(",");
+                imgs.forEach(element => {
+                    var img = $("<img />", {
+                        src: './assets/img/posts/' + data['id'] + '/' + element,
+                        class: "img-preview",
+                        width: "120px"
+                    });
+                    var imgContainer = $("<div></div>", {
+                        class: "img-container"
+                    });
+                    imgContainer.append(img);
+                    $("#editOpinionModal-preview").append(imgContainer);
+                });
             }
-            $("#show-more-responses" + id).html("Ver más");
-            dateFormatAll();
-        } else {
-            $("#show-more-responses" + id).hide();
-            if (!append) {
-                responsesContainer.html("<span class='text-muted text-center'>No hay respuestas</span>");
+        }).catch(function (error) {
+            console.error(error);
+        });
+}
+
+function deleteOpinionModalText(id) {
+    $("#deleteOpinionModal-idText").text(id);
+    $("#deleteOpinionModal-id").val(id);
+}
+
+function editResponseModalText(id) {
+    $("#editResponseModal-idText").text(id);
+    $("#editResponseModal-id").val(id);
+    sendAjax({id: id}, 'GET').then(
+        function (res) {
+            var data = JSON.parse(res);
+            $("#editResponseForm")[0].reset();
+            transposeData('editResponseModal', data, true);
+            $("#editResponseModal .note-placeholder").html("");
+            $("#editResponseModal .note-editable").html(data['Response']);
+            if (data['anonymous'] == 1) {
+                $("#editResponseModal-anonymous").prop("checked", true);
             } else {
-                responsesContainer.append("<span class='text-muted text-center'>No hay más respuestas</span>");
+                $("#editResponseModal-anonymous").prop("checked", false);
             }
-            
-        }
-        console.log("Se han cargado las respuestas");
-    } catch (error) {
-        console.error(error);
-        message("Algo salió mal", "error");
-        return false;
-    }
+            images = {};
+            $("#editResponseModal-preview").html("");
+            $("#editResponseModal-img").val("");
+            if (data['img'] != null) {
+                var imgs = data['img'].split(",");
+                imgs.forEach(element => {
+                    var img = $("<img />", {
+                        src: './assets/img/posts/' + data['id'] + '/' + element,
+                        class: "img-preview",
+                        width: "120px"
+                    });
+                    var imgContainer = $("<div></div>", {
+                        class: "img-container"
+                    });
+                    imgContainer.append(img);
+                    $("#editResponseModal-preview").append(imgContainer);
+                });
+            }
+        }).catch(function (error) {
+            console.error(error);
+        });
 }
 
-function loadMoreResponses(id) {
-    currentOffset += limit;
-    showResponses(id, true);
-}
-
-function toggleLike(element, id, typeLike = 'like', typePost = 'post') {
-    console.log(`Se ha dado Like/dislike a un ${typePost}`);
-    var numLikes = parseInt($(element).find("span").text());
-    var functionAtr = "";
-    
-    var action = (typeLike + typePost).toUpperCase();
-    sendAjax({ id: id }, action).then(function (res) {
-        if (res == 3) {
-            console.log("Necesitas estar logeado para dar like");
-            return;
-        }
-        if (typeLike == 'like') {
-            numLikes++;
-            functionAtr = "toggleLike(this,"+id+",'dislike','" + typePost + "')";
-            $(element).addClass("active");
-        } else if(typeLike == 'dislike' && numLikes > 0) {
-            numLikes--;
-            $(element).removeClass("active");
-            functionAtr = "toggleLike(this,"+id+",'like','"+typePost+"')";
-        }
-        $(element).find("span").text(numLikes);
-        $(element).attr('onclick', functionAtr);
-    }).catch(function (error) {
-        console.error(`Error en like del tipo ${typePost}:`, error);
-    });
+function deleteResponseModalText(id) {
+    $("#deleteResponseModal-idText").text(id);
+    $("#deleteResponseModal-id").val(id);
 }

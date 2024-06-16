@@ -11,24 +11,24 @@
         <!----MODO NORMAL--->
         <div class="card w-100" id="mode1">
             <div class="card-body p-4">
-                <div class="">
+                <div>
                     <div class="d-flex justify-content-between">
-                        <h3 id="mode1-username"><?php echo $_SESSION['PSESSION']['username']; ?></h3>
+                        <h3 id="mode1-username"><?php echo SESSION['username']; ?></h3>
                         <div><button class="btn btn-primary" onclick="modeEdit();">Editar <i class="fa-solid fa-pen"></i></button></div>
                     </div>
                     <div class="d-flex flex-column gap-1 pb-3">
-                        <span class="small text-muted"><?php echo $_SESSION['PSESSION']['role']; ?></span>
+                        <span class="small text-muted"><?php echo SESSION['role']; ?></span>
                     </div>
                     <p>
                         <h5 class="text-primary">Biografía:</h5>
-                        <span id="mode1-biography"><?php echo $_SESSION['PSESSION']['biography'] ?? "-"; ?></span>
+                        <span id="mode1-biography"><?php echo SESSION['biography'] ?? "-"; ?></span>
                     </p>
 
 
                     <div class="d-flex justify-content-between align-items-start flex-column flex-lg-row gap-1 gap-lg-3">
                         <div class="d-flex gap-1 gap-lg-3 flex-column flex-lg-row">
                             <div class="text-muted">
-                                Registro: <?php echo dateFormat($_SESSION['PSESSION']['timestamp_create']); ?>
+                                Registro: <?php echo dateFormat(SESSION['timestamp_create']); ?>
                             </div>
                         </div>
                     </div>
@@ -43,9 +43,9 @@
                         <div class="d-flex justify-content-between flex-column-reverse flex-lg-row">
                             <div>
                                 <div class="mb-3 mt-3">
-                                    <input type="hidden" id="actual-username" value="<?php echo $_SESSION['PSESSION']['username']; ?>">
-                                    <input type="hidden" name="id" value="<?php echo $_SESSION['PSESSION']['id']; ?>">
-                                    <input type="username" class="form-control" id="username" placeholder="Cambiar nombre de usuario" name="username" value="<?php echo $_SESSION['PSESSION']['username']; ?>" required>
+                                    <input type="hidden" id="actual-username" value="<?php echo SESSION['username']; ?>">
+                                    <input type="hidden" name="id" value="<?php echo SESSION['id']; ?>">
+                                    <input type="username" class="form-control" id="username" placeholder="Cambiar nombre de usuario" name="username" value="<?php echo SESSION['username']; ?>" required>
                                 </div>
                             </div>
                             <div>
@@ -57,7 +57,7 @@
                         <p>
                             <h5>Biografía:</h5>
                             <div class="mb-3 mt-3">
-                                <textarea class="form-control" rows="5" id="biography" name="biography"><?php echo $_SESSION['PSESSION']['biography']; ?></textarea>
+                                <textarea class="form-control" rows="5" id="biography" name="biography"><?php echo SESSION['biography']; ?></textarea>
                             </div>
                         </p>
 

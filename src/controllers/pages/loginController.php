@@ -16,15 +16,10 @@ if (!empty(getView())) {
 
 function login(){
     $data = $_POST;
-    if(isset($data['g-recaptcha-response'])){
-        if(checkCaptcha($data['g-recaptcha-response']) == true){
-            $response = AuthController::auth($data);
-            echo json_encode($response);
-        } else {
-            echo 4;
-        }
-    }else{
+    if(checkCaptcha(($data['g-recaptcha-response'] ?? 0)) == true){
+        $response = AuthController::auth($data);
+        echo json_encode($response);
+    } else {
         echo 4;
     }
-    
 }

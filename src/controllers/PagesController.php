@@ -107,11 +107,21 @@ class PagesController
         require_once "./src/views/pages/profile.php";
     }
 
-    // PÁGINA OPINIONES
-    public static function myopinions() {
+    // PÁGINA PERFIL
+    public static function user() {
         self::checkSession();
-        self::pageScript('myopinions');
-        require_once "./src/views/pages/myopinions.php";
+        if(isset($_GET) && isset($_GET['id'])){
+            $iduser = $_GET['id'];
+            $db = new QueryModel();
+            $user = $db->queryUnique("SELECT u.id,u.username,u.biography,u.id_role,r.name role,u.timestamp_create FROM SYS_USER u LEFT JOIN SYS_ROLE r ON u.id_role = r.id WHERE u.id = :id",[':id' => $iduser]);
+            if($user){
+                require_once "./src/views/pages/user.php";
+            }else{
+                self::error404();
+            }
+        }else{
+            self::error404();
+        }
     }
 
     // PÁGINA ERROR 404

@@ -19,7 +19,7 @@ $router->get('/login', 'PagesController@login');
 $router->get('/logout', 'PagesController@logout');
 $router->get('/register', 'PagesController@register');
 $router->get('/profile', 'PagesController@profile');
-$router->get('/myopinions', 'PagesController@myopinions');
+$router->get('/user', 'PagesController@user');
 
 $router->set404('PagesController@error404');
 

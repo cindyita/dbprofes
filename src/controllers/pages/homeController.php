@@ -5,8 +5,17 @@ session_start();
 
 if (!empty(getView())) {
     switch (getView()) {
+        case 'GET':
+            getOpinion();
+        break;
         case "POST":
             postOpinion();
+        break;
+        case 'DELETE':
+            deleteOpinion();
+        break;
+        case 'UPDATE':
+            updateOpinion();
         break;
         case 'LOADOPINIONS':
             loadOpinions();
@@ -33,6 +42,20 @@ if (!empty(getView())) {
             echo "No se ha definido una acción";
         break;
     }
+}
+
+function getOpinion(){
+    $data = getPostData();
+    $db = new QueryModel();
+    $id = $data['id'];
+    $opinion = $db->queryUnique("SELECT o.*,a.name accessibility,f.name form_grading,t.name time_grading,img.img,img.num_img
+            FROM POST_OPINION o 
+            LEFT JOIN REG_ACCESSIBILITY a ON o.id_accessibility = a.id
+            LEFT JOIN REG_FORM_GRADING f ON o.id_form_grading = f.id
+            LEFT JOIN REG_TIME_GRADING t ON o.id_time_grading = t.id
+            LEFT JOIN POST_IMG img ON img.id_opinion_response = o.id AND img.type_opinion = 1
+            WHERE o.id = :id",[':id'=>$id]);
+    echo json_encode($opinion);
 }
 
 function postOpinion() {
@@ -84,13 +107,91 @@ function postOpinion() {
     }
 }
 
+function deleteOpinion(){
+    $data = getPostData();
+    $db = new QueryModel();
+    $row = $db->query("DELETE FROM POST_OPINION WHERE id = :id",[":id"=>$data['id']]);
+    if($row == []){
+        echo 1;
+    }else{
+        echo json_encode($row);
+    }
+}
+
+function updateOpinion(){
+    $data = getPostData();
+    $db = new QueryModel();
+    $id = $data['id'];
+
+    if(isset($data['anonymous']) && $data['anonymous'] == "on"){
+        $data['anonymous'] = 1;
+    }else if(isset($data['anonymous'])){
+        $data['anonymous'] = 0;
+    }
+
+    $fields = dataInQuery($data);
+    
+    if($_FILES && $_FILES['images']){
+        $numFiles = is_array($_FILES['images']['name']);
+        $ruta = '../../../assets/img/posts/'.$id.'/';
+        if (!file_exists($ruta)) {
+            mkdir($ruta, 0777, true);
+        }
+        $files = glob($ruta . '*');
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+        $imgs = "";
+        if($numFiles){
+            $img = createMultiFiles('images',$ruta,"",0);
+            $numImg = count($_FILES['images']['name']);
+            $img = call_user_func_array('array_merge', $img);
+            $imgs = implode(',', $img);
+        }else{
+            $img = createFile('images',$ruta,"",0);
+            $numImg = 1;
+            $img = call_user_func_array('array_merge', $img);
+            $imgs = $img;
+        }
+        if($img == 6){
+            echo 6;
+            return;
+        }
+        $fields['num_img'] = $numImg;
+        $db->query("DELETE FROM POST_IMG WHERE id_opinion_response = :id_opinion AND type_opinion = 1",[':id_opinion'=>$id]);
+        $db->query("INSERT INTO POST_IMG(img,type_opinion,id_opinion_response,num_img) VALUES(:img,1,:id_opinion,:num_img)",[":img"=>$imgs,":id_opinion"=>$id,":num_img"=>$numImg]);
+    }
+
+    $setParams = [];
+    $params = [":id"=>$id];
+    foreach ($fields as $key => $value) {
+        if ($value !== null) {
+            $setParams[] = "$key = :$key";
+            $params[":$key"] = $value;
+        }
+    }
+
+    if (!empty($setParams)) {
+        $setQuery = implode(', ', $setParams);
+        $row = $db->query("UPDATE POST_OPINION SET $setQuery WHERE id=:id",$params);
+    }
+
+    if($row == []){
+        echo 1;
+    }else{
+        echo json_encode($row);
+    }
+}
+
 function loadOpinions(){
     $data = getPostData();
     $limit = $data['limit'] ?? 15;
     $offset = $data['offset'] ?? 0;
     $db = new QueryModel();
+    $typesearch = isset($data['typesearch']) ? urldecode($data['typesearch']) : "";
     $textsearch = isset($data['textsearch']) ? urldecode($data['textsearch']) : "";
-    $typesearch = isset($data['typesearch']) ? ($data['typesearch']) : "";
 
     if(isset($_SESSION['PSESSION'])){
         $iduser = $_SESSION['PSESSION']['id'];
@@ -109,19 +210,36 @@ function loadOpinions(){
                 LIMIT :limits OFFSET :offset",[":id_user"=>$iduser,':limits'=>$limit,":offset"=>$offset]);
         }else{
             if (preg_match('/^[\p{L}\p{N}_\-,.\s]+$/u', $textsearch) && preg_match('/^[\p{L}\p{N}_\-,.\s]+$/u', $typesearch)) {
-                $opinions = $db->query("SELECT o.*,u.username,a.name accessibility,f.name form_grading,t.name time_grading,img.img,img.num_img, ps.num_likes likes, ps.num_responses responses,
-                IF(rl.id_opinion_response IS NOT NULL, 1, 0) AS user_liked
-                    FROM POST_OPINION o 
-                    LEFT JOIN SYS_USER u ON o.id_user = u.id
-                    LEFT JOIN REG_ACCESSIBILITY a ON o.id_accessibility = a.id
-                    LEFT JOIN REG_FORM_GRADING f ON o.id_form_grading = f.id
-                    LEFT JOIN REG_TIME_GRADING t ON o.id_time_grading = t.id
-                    LEFT JOIN POST_IMG img ON img.id_opinion_response = o.id AND img.type_opinion = 1
-                    LEFT JOIN VIEW_POST_STATS ps ON ps.post_id = o.id
-                    LEFT JOIN REL_LIKES rl ON o.id = rl.id_opinion_response AND rl.type_opinion = 1 AND rl.id_user = :id_user
-                    WHERE o.$typesearch LIKE :text
-                    ORDER BY o.id DESC
-                    LIMIT :limits OFFSET :offset",[":id_user"=>$iduser,':limits'=>$limit,":offset"=>$offset,":text" => '%' . $textsearch . '%']);
+                if($typesearch == "my"){
+                    $opinions = $db->query("SELECT o.*,u.username,a.name accessibility,f.name form_grading,t.name time_grading,img.img,img.num_img, ps.num_likes likes, ps.num_responses responses,
+                    IF(rl.id_opinion_response IS NOT NULL, 1, 0) AS user_liked
+                        FROM POST_OPINION o 
+                        LEFT JOIN SYS_USER u ON o.id_user = u.id
+                        LEFT JOIN REG_ACCESSIBILITY a ON o.id_accessibility = a.id
+                        LEFT JOIN REG_FORM_GRADING f ON o.id_form_grading = f.id
+                        LEFT JOIN REG_TIME_GRADING t ON o.id_time_grading = t.id
+                        LEFT JOIN POST_IMG img ON img.id_opinion_response = o.id AND img.type_opinion = 1
+                        LEFT JOIN VIEW_POST_STATS ps ON ps.post_id = o.id
+                        LEFT JOIN REL_LIKES rl ON o.id = rl.id_opinion_response AND rl.type_opinion = 1 AND rl.id_user = :id_user1
+                        WHERE o.id_user = :id_user2
+                        ORDER BY o.id DESC
+                        LIMIT :limits OFFSET :offset",[":id_user1"=>$iduser,":id_user2"=>$iduser,':limits'=>$limit,":offset"=>$offset]);
+                }else{
+                    $opinions = $db->query("SELECT o.*,u.username,a.name accessibility,f.name form_grading,t.name time_grading,img.img,img.num_img, ps.num_likes likes, ps.num_responses responses,
+                    IF(rl.id_opinion_response IS NOT NULL, 1, 0) AS user_liked
+                        FROM POST_OPINION o 
+                        LEFT JOIN SYS_USER u ON o.id_user = u.id
+                        LEFT JOIN REG_ACCESSIBILITY a ON o.id_accessibility = a.id
+                        LEFT JOIN REG_FORM_GRADING f ON o.id_form_grading = f.id
+                        LEFT JOIN REG_TIME_GRADING t ON o.id_time_grading = t.id
+                        LEFT JOIN POST_IMG img ON img.id_opinion_response = o.id AND img.type_opinion = 1
+                        LEFT JOIN VIEW_POST_STATS ps ON ps.post_id = o.id
+                        LEFT JOIN REL_LIKES rl ON o.id = rl.id_opinion_response AND rl.type_opinion = 1 AND rl.id_user = :id_user
+                        WHERE o.$typesearch LIKE :text
+                        ORDER BY o.id DESC
+                        LIMIT :limits OFFSET :offset",[":id_user"=>$iduser,':limits'=>$limit,":offset"=>$offset,":text" => $textsearch . '%']);
+                }
+                
             }else{
                 echo 4;
                 return;
@@ -145,13 +263,31 @@ function loadOpinions(){
     $html = "";
 
     foreach ($opinions as $value) {
-        $anonimo = $value['anonymous'] == 1 ? "Opinión anónima" : "Aportado por: <a href='#' class='link-user'>".$value['username']."</a>";
+        $anonimo = $value['anonymous'] == 1 ? "Opinión anónima" : ($value['username'] ? ("Aportado por: <a href='user?id=".$value['id_user']."' class='link-user'>".$value['username']."</a>") : "Aportado por: ?");
 
         if($value['user_liked'] == "1"){
             $likefield = '<a onclick="toggleLike(this,'.$value['id'].',\'dislike\',\'post\')" class="text-primary like active"><i class="fas fa-thumbs-up me-1"></i><span>'.$value['likes'].'</span></a>';
         }else{
             $likefield = '<a onclick="toggleLike(this,'.$value['id'].',\'like\',\'post\')" class="text-primary like"><i class="fas fa-thumbs-up me-1"></i><span>'.$value['likes'].'</span></a>';
         }
+        $actions = '<div class="d-flex gap-2 align-items-center">
+                        <span class="text-primary">#'.$value['id'].'</span>
+                    </div>';
+        if (isset($_SESSION['PSESSION']) && ($_SESSION['PSESSION']['id'] == $value['id_user'] || $_SESSION['PSESSION']['id_role'] <= 2)) {
+            $actions = '<div class="d-flex gap-2 align-items-center">
+                            <span class="text-primary">#'.$value['id'].'</span>
+                            <span>
+                                <div class="dropdown">
+                                    <button type="button" class="btn btn-muted-v2" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                                    <ul class="dropdown-menu dropdown-menu-end actions-opinion">
+                                        <li><a class="dropdown-item" onclick="editOpinionModalText('.$value['id'].')" data-bs-toggle="modal" data-bs-target="#editOpinionModal"><i class="fa-solid fa-pen"></i> Editar</a></li>
+                                        <li><a class="dropdown-item text-danger" onclick="deleteOpinionModalText('.$value['id'].')" data-bs-toggle="modal" data-bs-target="#deleteOpinionModal"><i class="fa-solid fa-trash text-danger"></i> Eliminar</a></li>
+                                    </ul>
+                                </div>
+                            </span>
+                        </div>';
+        }
+        
 
         $html .= '
             <div class="col-12">
@@ -164,7 +300,7 @@ function loadOpinions(){
                             <div class="">
                                 <div class="d-flex justify-content-between">
                                     <h5>Opinando sobre: '.$value['teacher'].'</h5>
-                                    <span class="text-primary">#'.$value['id'].'</span>
+                                    '.$actions.'
                                 </div>
                                 <div class="d-flex flex-column gap-1 pb-3">
                                     <span class="small">Escuela: '.$value['school'].'</span>
@@ -294,7 +430,21 @@ function loadResponses(){
         }else{
             $likefield = '<a onclick="toggleLike(this,'.$value['id'].',\'like\',\'response\')" class="text-primary me-2 like"><i class="fas fa-thumbs-up me-1"></i>'.$value['likes'].'</a>';
         }
-        $anonimo = $value['anonymous'] == 1 ? "anonimo" : "<a href='#' class='link-user'>".$value['username']."</a>";
+        $anonimo = $value['anonymous'] == 1 ? "anonimo" : "<a href='user?id=".$value['id_user']."' class='link-user'>".$value['username']."</a>";
+
+        $actions = '';
+        if (isset($_SESSION['PSESSION']) && ($_SESSION['PSESSION']['id'] == $value['id_user'] || $_SESSION['PSESSION']['id_role'] <= 2)) {
+            $actions = '<span>
+                                <div class="dropdown">
+                                    <button type="button" class="btn btn-muted-v2" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                                    <ul class="dropdown-menu dropdown-menu-end actions-opinion">
+                                        <li><a class="dropdown-item" onclick="editResponseModalText('.$value['id'].')" data-bs-toggle="modal" data-bs-target="#editResponseModal"><i class="fa-solid fa-pen"></i> Editar</a></li>
+                                        <li><a class="dropdown-item text-danger" onclick="deleteResponseModalText('.$value['id'].')" data-bs-toggle="modal" data-bs-target="#deleteResponseModal"><i class="fa-solid fa-trash text-danger"></i> Eliminar</a></li>
+                                    </ul>
+                                </div>
+                            </span>';
+        }
+
         $html .= '
             <div class="d-flex flex-start mb-3">
                 <div class="icon-primary">
@@ -303,7 +453,10 @@ function loadResponses(){
                 <div class="card w-100">
                     <div class="p-3 pb-1 text-primary d-flex justify-content-between">
                         <p class="title">Respuesta de '.$anonimo.' a #'.$value['id_opinion'].'</p>
-                        <span>#'.$value['id_opinion'].'#'.$value['id'].'</span>
+                        <div class="d-flex gap-2 align-items-center">
+                            <span>#'.$value['id_opinion'].'#'.$value['id'].'</span>
+                            '.$actions.'
+                        </div>
                     </div>
                     <div class="card-body p-4 pt-0">
                         <div class="">

@@ -2,11 +2,12 @@
 
 <div class="p-3 mt-5 text-center">
     <hr>
-    @ DBprofes v0.1
+    @ DBprofes v0.1 BETA
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/app.js?version=<?php echo VERSION; ?>"></script>
+<script src="./assets/required/summernote/summernote-lite.min.js"></script>
 <?php 
     if($scripts){
         foreach ($scripts as $value) {

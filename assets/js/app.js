@@ -6,6 +6,7 @@ const CONTROLLER = pageController();
 `fadeOut()` method on them. This code is likely intended to fade out any elements with the
 "page-overlay" class when the document is ready or when the DOM has finished loading. */
 $(function () {
+  $('body').prepend('<div id="message-container"></div>');
   var timeout = setTimeout(function() {
     alert('Parece que hay problemas de conexión. Intente recargar la página o regrese más tarde.');
   }, 8000);
@@ -30,7 +31,7 @@ var typesAlertText = { "error": "Error", "info": "Info", "success": "Éxito", "w
 function message(text, type = "info") {
   var html = '<div class="message"><div class="alert alert-dismissible '+typesAlert[type]+'"><button type="button" data-bs-dismiss="alert" class="close"><i class="fa-solid fa-xmark"></i></button><strong>'+typesAlertText[type]+':</strong> '+text+'</div></div>';
   var $message = $(html);
-  $message.hide().prependTo('body').fadeIn();
+  $message.hide().appendTo('#message-container').fadeIn();
   setTimeout(function() {
       $message.fadeOut(function() {
           $(this).remove();
@@ -62,6 +63,10 @@ function processError(res) {
     case 4:
       message("El captcha es inválido. Recarga la página.", "error");
       console.log("Error 4: El captcha es inválido");
+      return false;
+    case 5:
+      message("Hay carácteres inválidos", "error");
+      console.log("Error 4: Hay carácteres inválidos");
       return false;
     default:
       console.log("Error: "+res);
@@ -206,25 +211,32 @@ function copyToClipboard(text) {
  * the ID of an element in the HTML document, and the corresponding value represents the data that
  * should be assigned to that element.
  */
-function transposeData(modalid, data) {
+function transposeData(modalid, data, idModalInInput = false) {
     for (const key in data) {
         if (data.hasOwnProperty(key)) {
             const value = data[key];
-            const element = $("#" + modalid + "-" + key);
+            var element = $("#" + key);
+            if (idModalInInput) {
+                element = $("#" + modalid + "-" + key);
+            }
+
             if (element.length > 0) {
-                
-                if (element.is("input") || element.is("select") || element.is("textarea") ) {
-                    element.val(value);
-                } else {
-                    element.html(value);
+                if (element.attr('type') !== 'file') {
+                    if (element.is("input") || element.is("select") || element.is("textarea")) {
+                        element.val(value);
+                    } else {
+                        element.html(value);
+                    }
                 }
             }
+            
             if (key == 'id' && $("#" + modalid + "-" + key + "Text").length > 0) {
-                $("#"+modalid+"-"+key+"Text").html(value);
+                $("#" + modalid + "-" + key + "Text").html(value);
             }
         }
     }
 }
+
 
 /**
  * The function `handleFileImage` is used to handle and validate an image file, and display a preview
@@ -279,6 +291,37 @@ function handleFileImages(files, previewId) {
         }
 
         var reader = new FileReader();
+      reader.onload = function (e) {
+            var img = $("<img />", {
+                src: e.target.result,
+                class: "img-preview",
+                width: "120px"
+            });
+            var imgContainer = $("<div></div>", {
+                class: "img-container"
+            });
+            imgContainer.append(img);
+            previewContainer.append(imgContainer);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function handleFileImagesv2(files, previewId) {
+    const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff"];
+    var previewContainer = $("#" + previewId);
+    previewContainer.empty();
+
+    Array.from(files).forEach(file => {
+        var fileExtension = file.name.split(".").pop().toLowerCase();
+        if (allowedExtensions.indexOf(fileExtension) === -1) {
+            alert("El archivo '" + file.name + "' tiene una extensión no permitida");
+            return;
+        }
+
+        images[file.name] = file;
+
+        var reader = new FileReader();
         reader.onload = function (e) {
             var img = $("<img />", {
                 src: e.target.result,
@@ -311,6 +354,136 @@ function dateFormatAll() {
   });
   console.log("Se han formateado las fechas");
 }
+//------------------OPINIONS------------------------
+async function realodOpinions(type = 1, append = false, typesearch = "", textsearch = "") {
+    $("#btn-show-more").hide();
+    if (!append) {
+        $("#show-opinions").html('<div class="spinner-border text-muted"></div>');
+    } else {
+        $("#btn-show-more").show();
+        $("#show-more").html('<div class="spinner-border text-muted"></div>');
+    }
+
+    try {
+      var res = await sendAjax({ type: type, limit: limit, offset: currentOffset, typesearch: typesearch, textsearch: textsearch }, 'LOADOPINIONS');
+        if (res == 4) {
+            message("La búsqueda tiene carácteres inválidos", "error");
+            $("#show-opinions").html("<span class='text-muted text-center'>Error en la búsqueda</span>");
+            $("#search-form")[0].reset();
+            return false;
+        }
+        const opinions = JSON.parse(res);
+        if (opinions != "") {
+            console.log("Se han cargado las opiniones");
+            if (append) {
+                $("#show-opinions").append(opinions);
+            } else {
+                $("#show-opinions").html(opinions);
+            }
+            $("#btn-show-more").show();
+            dateFormatAll();
+        } else {
+            if (append) {
+                $("#show-opinions").append("<span class='text-muted text-center'>No hay más opiniones</span>");
+            } else {
+                $("#show-opinions").html("<span class='text-muted text-center'>No hay opiniones</span>");
+            }    
+            $("#show-more").hide();
+        }
+        $("#show-more").html('Ver más');
+        return true;
+    } catch (error) {
+        console.error(error);
+        message("Algo salió mal","error");
+        return false;
+    }
+}
+
+function collapseResponsesShow(id) {
+    var isShow = $("#responses" + id).hasClass("show");
+    return isShow;
+}
+
+function ImagePostModal(id, img) {
+    $("#opImg-id").text(id);
+    $("#opImg-img").html('<img src="./assets/img/posts/'+id+'/'+img+'" width="100%">');
+}
+
+function ImageResponseModal(idopinion,id, img) {
+    $("#resImg-id").text('#'+idopinion+'#'+id);
+    $("#resImg-img").html('<img src="./assets/img/responses/'+id+'/'+img+'" width="100%">');
+}
+
+async function showResponses(id, append = false) {
+    const responsesContainer = $("#responses" + id+"-content")
+
+    if (!append) {
+        responsesContainer.html('<div class="spinner-border text-muted"></div>');
+    } else {
+        $("#show-more-responses" + id).html('<div class="spinner-border text-muted"></div>');
+    }
+
+    try {
+        
+        var res = await sendAjax({ id: id, limit: responseLimit, offset: responseOffset }, 'LOADRESPONSES');
+        res = JSON.parse(res);
+        if (res) {
+            if (append) {
+                responsesContainer.append(res);
+            } else {
+                responsesContainer.html(res);
+            }
+            $("#show-more-responses" + id).html("Ver más");
+            dateFormatAll();
+        } else {
+            $("#show-more-responses" + id).hide();
+            if (!append) {
+                responsesContainer.html("<span class='text-muted text-center'>No hay respuestas</span>");
+            } else {
+                responsesContainer.append("<span class='text-muted text-center'>No hay más respuestas</span>");
+            }
+            
+        }
+        console.log("Se han cargado las respuestas");
+    } catch (error) {
+        console.error(error);
+        message("Algo salió mal", "error");
+        return false;
+    }
+}
+
+function loadMoreResponses(id) {
+    currentOffset += limit;
+    showResponses(id, true);
+}
+
+function toggleLike(element, id, typeLike = 'like', typePost = 'post') {
+    console.log(`Se ha dado Like/dislike a un ${typePost}`);
+    var numLikes = parseInt($(element).find("span").text());
+    var functionAtr = "";
+    
+    var action = (typeLike + typePost).toUpperCase();
+    sendAjax({ id: id }, action).then(function (res) {
+        if (res == 3) {
+            console.log("Necesitas estar logeado para dar like");
+            return;
+        }
+        if (typeLike == 'like') {
+            numLikes++;
+            functionAtr = "toggleLike(this,"+id+",'dislike','" + typePost + "')";
+            $(element).addClass("active");
+        } else if(typeLike == 'dislike' && numLikes > 0) {
+            numLikes--;
+            $(element).removeClass("active");
+            functionAtr = "toggleLike(this,"+id+",'like','"+typePost+"')";
+        }
+        $(element).find("span").text(numLikes);
+        $(element).attr('onclick', functionAtr);
+    }).catch(function (error) {
+        console.error(`Error en like del tipo ${typePost}:`, error);
+    });
+}
+//---------------------------------------------------------
 
 function loadBtn(id) {
   $("#" + id).html('<div class="spinner-border text-muted"></div>');
@@ -322,41 +495,18 @@ function unLoadBtn(id,text = "Enviar") {
   $("#" + id).prop("disabled", false);
 }
 
-// function sendForm(id, action = 'GET', img = "") {
-//     return new Promise((resolve, reject) => {
-
-//         $("#" + id).off("submit").on("submit", async function (event) {
-//             event.preventDefault();
-//             const textBtn = $("#" + id + " button[type=submit]").text();
-//             $("#" + id + " button[type=submit]").html('<div class="spinner-border text-muted"></div>');
-//             var formData = new FormData($(this)[0]);
-//             if (img != "") {
-//                 if ($("#" + img)[0].files[0]) {
-//                     var file = $("#" + img)[0].files[0];
-//                     formData.append('file', file);
-//                 }
-//             }
-//             try {
-//                 const res = await sendAjaxForm(formData, action);
-//                 const parsedRes = JSON.parse(res);
-//                 if (parsedRes == 1) {
-//                     $(this).trigger('reset');
-//                     resolve(parsedRes);
-//                 } else {
-//                     message("Algo salió mal", "error");
-//                     console.log(parsedRes);
-//                     reject(parsedRes);
-//                 }
-//             } catch (error) {
-//                 message("Algo salió mal", "error");
-//                 console.error(error);
-//                 reject(error);
-//             } finally {
-//                 $("#" + id + " button[type=submit]").html(textBtn);
-//             }
-//         });
-//     });
-// }
+function loadBtnForm(form) {
+  var btn = $(form).find("button[type=submit]");
+  btn.data('text', btn.html());
+  btn.prop("disabled", true);
+  btn.html('<div class="spinner-border text-light spinner-border-sm"></div>');
+}
+function unLoadBtnForm(form,text = "") {
+  var btn = $(form).find("button[type=submit]");
+  var newText = text == "" ? btn.data('text') : text;
+  btn.html(newText);
+  btn.prop("disabled", false);
+}
 
 function getQueryParams() {
   const params = new URLSearchParams(window.location.search);
@@ -371,3 +521,4 @@ function reloadWithoutParams() {
     const url = window.location.protocol + "//" + window.location.host + window.location.pathname;
     window.location.replace(url);
 }
+

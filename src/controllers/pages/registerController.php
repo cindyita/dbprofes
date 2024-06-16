@@ -3,7 +3,7 @@ require_once '../../../commons.php';
 use ModelsNS\QueryModel;
 
 if (!empty(getView())) {
-    switch (getView()) {
+    switch(getView()) {
         case 'CHECKEMAIL':
             checkExistEmail();
         break;
@@ -47,7 +47,7 @@ function checkExistUsername() {
 
 function register(){
     $data = $_POST;
-    if(checkCaptcha($data['g-recaptcha-response']) == true){
+    if(checkCaptcha(($data['g-recaptcha-response'] ?? 0)) == true){
         $db = new QueryModel();
         if (!empty($data) && count($data)>0) {
             $key = password_hash($data['pass'], PASSWORD_DEFAULT);

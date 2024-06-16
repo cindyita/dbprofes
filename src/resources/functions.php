@@ -232,6 +232,12 @@ function isJson($string) {
  * success status of the ReCaptcha verification.
  */
 function checkCaptcha($response){
+    if($_ENV['DISABLE_CAPTCHA'] == "true"){
+        return true;
+    }
+    if($response === 0){
+        return false;
+    }
     $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify'; 
     $recaptcha_secret = $_ENV["RECAPTCHA_SECRET"]; 
     $recaptcha_response = $response; 
@@ -452,3 +458,15 @@ function createMultiFiles($campo, $ruta, $nameFile = "", $reemplazar = 1) {
         return "Error en la consulta: " . $e->getMessage();
     }
 }
+
+/*
+CREATE VIEW VIEW_POST_STATS AS
+SELECT o.id AS post_id,
+COUNT(DISTINCT rl.id_opinion_response) AS num_likes,
+COUNT(DISTINCT r.id) AS num_responses
+FROM POST_OPINION o
+LEFT JOIN REL_LIKES rl ON o.id = rl.id_opinion_response AND rl.type_opinion = 1
+LEFT JOIN POST_RESPONSE r ON o.id = r.id_opinion GROUP BY o.id
+
+CREATE VIEW VIEW_RESPONSE_STATS AS SELECT o.id AS response_id, COUNT(DISTINCT rl.id_opinion_response) AS num_likes FROM POST_RESPONSE o LEFT JOIN REL_LIKES rl ON o.id = rl.id_opinion_response AND rl.type_opinion = 2;
+*/

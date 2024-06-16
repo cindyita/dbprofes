@@ -17,20 +17,20 @@
                 <p>Antes de opinar revisa si ya hay una opinión de ese profesor/a</p>
                 <form class="opinionForm" method="post" id="opinionForm" autocomplete="off" enctype="multipart/form-data">
                     <div class="mb-3 mt-3">
-                        <label for="teacher" class="form-label">Nombre del profesor/a:</label>
-                        <input type="text" class="form-control" placeholder="Ingresa el nombre del profesor/a" name="teacher">
+                        <label for="teacher" class="form-label">Nombre COMPLETO del profesor/a:</label>
+                        <input type="text" class="form-control" placeholder="Ingresa el nombre completo del profesor/a" name="teacher" required>
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="school" class="form-label">Escuela:</label>
-                        <input type="text" class="form-control" placeholder="Ingresa la escuela o independiente" name="school">
+                        <input type="text" class="form-control" placeholder="Agrega el nombre COMPLETO de la escuela (Ejemplo: En vez de UDC pon Universidad Del Campo)" name="school" required>
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="subject" class="form-label">Asignatura:</label>
-                        <input type="text" class="form-control" placeholder="Ingresa la asignatura que te impartió" name="subject">
+                        <input type="text" class="form-control" placeholder="Ingresa la asignatura que te impartió" name="subject" required>
                     </div>
                     <div class="mb-3 mt-3">
                         <label>Forma de calificar:</label>
-                        <select class="form-select" name="id_form_grading" id="id_form_grading">
+                        <select class="form-select" name="id_form_grading" id="id_form_grading" required>
                             <?php foreach ($form_grading as $key => $value) { ?>
                                 <option value="<?php echo $value['id']; ?>"><?php echo $value['name']; ?></option>
                             <?php } ?>
@@ -38,7 +38,7 @@
                     </div>
                     <div class="mb-3 mt-3">
                         <label>Tiempo de calificar:</label>
-                        <select class="form-select" name="id_time_grading" id="id_time_grading">
+                        <select class="form-select" name="id_time_grading" id="id_time_grading" required>
                             <?php foreach ($time_grading as $key => $value) { ?>
                                 <option value="<?php echo $value['id']; ?>"><?php echo $value['name']; ?></option>
                             <?php } ?>
@@ -46,15 +46,16 @@
                     </div>
                     <div class="mb-3 mt-3">
                         <label>Accesibilidad:</label>
-                        <select class="form-select" name="id_accessibility" id="id_accessibility">
+                        <select class="form-select" name="id_accessibility" id="id_accessibility" required>
                             <?php foreach ($accessibility as $key => $value) { ?>
                                 <option value="<?php echo $value['id']; ?>"><?php echo $value['name']; ?></option>
                             <?php } ?>
                         </select>
                     </div>
                     <div class="mb-3 mt-3">
-                        <label for="comment" class="mb-2">Opinión:</label>
-                        <textarea class="form-control" rows="8" id="comment" name="opinion" placeholder="Asegurate de mencionar datos que puedan ser útiles para otros estudiantes por ejemplo cómo le agrada que realices las tareas o si hay que tener consideraciones adicionales como tipo de cita que deberían usar o si revisa estrictamente la ortografía, si tuviste algún problema o si te ayudó en algo, entre otros."></textarea>
+                        <label for="opiniontext" class="mb-2">Opinión:</label>
+                        <textarea class="form-control" rows="8" id="opiniontext" name="opinion" placeholder="Asegurate de mencionar datos que puedan ser útiles para otros estudiantes."></textarea>
+                        <!-- <div id="opiniontext"></div> -->
                     </div>
                     <div class="mb-3 mt-3">
                         <label for="img" class="form-label">Imagenes: (Selecciona varias imagenes con ctrl + click)</label>
@@ -156,3 +157,169 @@
     </div>
   </div>
 </div>
+<?php if(isset($_SESSION['PSESSION'])){ ?>
+<!-- OPINION EDIT -->
+<div class="modal" id="editOpinionModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title">Editar opinión #<span id="editOpinionModal-text"></span></h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="p-2 w-100 d-flex flex-column align-items-center gap-3">
+            <form class="opinionForm w-100" method="post" id="editOpinionForm" autocomplete="off" enctype="multipart/form-data">
+                <div class="mb-3 mt-3">
+                    <label for="teacher" class="form-label">Nombre del profesor/a:</label>
+                    <input type="text" class="form-control" id="editOpinionModal-teacher" placeholder="Ingresa el nombre del profesor/a" name="teacher">
+                </div>
+                <div class="mb-3 mt-3">
+                    <label for="school" class="form-label">Escuela:</label>
+                    <input type="text" class="form-control" placeholder="Ingresa la escuela o independiente" name="school" id="editOpinionModal-school">
+                </div>
+                <div class="mb-3 mt-3">
+                    <label for="subject" class="form-label">Asignatura:</label>
+                    <input type="text" class="form-control" placeholder="Ingresa la asignatura que te impartió" name="subject" id="editOpinionModal-subject">
+                </div>
+                <div class="mb-3 mt-3">
+                    <label>Forma de calificar:</label>
+                    <select class="form-select" name="id_form_grading" id="editOpinionModal-id_form_grading">
+                        <?php foreach ($form_grading as $key => $value) { ?>
+                            <option value="<?php echo $value['id']; ?>"><?php echo $value['name']; ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+                <div class="mb-3 mt-3">
+                    <label>Tiempo de calificar:</label>
+                    <select class="form-select" name="id_time_grading" id="editOpinionModal-id_time_grading">
+                        <?php foreach ($time_grading as $key => $value) { ?>
+                            <option value="<?php echo $value['id']; ?>"><?php echo $value['name']; ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+                <div class="mb-3 mt-3">
+                    <label>Accesibilidad:</label>
+                    <select class="form-select" name="id_accessibility" id="editOpinionModal-id_accessibility">
+                        <?php foreach ($accessibility as $key => $value) { ?>
+                            <option value="<?php echo $value['id']; ?>"><?php echo $value['name']; ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+                <div class="mb-3 mt-3">
+                    <label for="comment" class="mb-2">Opinión:</label>
+                    <textarea class="form-control" rows="8" id="editOpinionModal-opinion" name="opinion" placeholder="Asegurate de mencionar datos que puedan ser útiles para otros estudiantes por ejemplo cómo le agrada que realices las tareas o si hay que tener consideraciones adicionales como tipo de cita que deberían usar o si revisa estrictamente la ortografía, si tuviste algún problema o si te ayudó en algo, entre otros."></textarea>
+                </div>
+                <div class="mb-3 mt-3">
+                    <label for="editOpinionModal-img" class="form-label">Resubir imagenes: (Selecciona varias imagenes con ctrl + click) (Si subes imagenes, se borrarán las anteriores).</label>
+                    <input type="file" class="form-control" name="editimg" id="editOpinionModal-img" onchange="handleFileImagesv2(this.files, 'editOpinionModal-preview')" multiple>
+                    <div id="editOpinionModal-preview" class="d-flex gap-2 flex-wrap py-3"></div>
+                </div>
+                <div class="form-check mb-3">
+                    <label class="form-check-label">
+                    <input class="form-check-input" type="checkbox" name="anonymous" id="editOpinionModal-anonymous"> Opinión anónima
+                    </label>
+                </div>
+
+                <input type="hidden" name="id" id="editOpinionModal-id">
+
+                <div class="text-center">
+                    <button class="btn btn-primary mt-3" type="submit" data-bs-dismiss="modal">Editar opinión</button>
+                </div>
+            </form>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- OPINION DELETE -->
+<div class="modal" id="deleteOpinionModal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title">¿Deseas eliminar la opinión #<span id="deleteOpinionModal-idText"></span>?</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+        <div class="modal-body">
+            <form method="post" id="deleteOpinionModalForm">
+                <input type="hidden" name="id" id="deleteOpinionModal-id">
+                <button type="submit" class="btn btn-danger" data-bs-dismiss="modal">Eliminar</button>
+            </form>
+        </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- RESPONSE EDIT -->
+<!-- <div class="modal" id="editResponseModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title">Editar opinión #<span id="editResponseModal-text"></span></h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="p-2 w-100 d-flex flex-column align-items-center gap-3">
+            <form method="post" id="responseForm'.$value['id'].'" class="responseForm" autocomplete="off" enctype="multipart/form-data" data-id="'.$value['id'].'">
+                <div class="mb-3 mt-3">
+                    <label for="comment" class="mb-2">Respuesta:</label>
+                    <textarea class="form-control" rows="8" name="opinion" placeholder="Respuesta a la opinión.."></textarea>
+                </div>
+                <div class="mb-3 mt-3">
+                    <label for="img" class="form-label">Imagenes: (Selecciona varias imagenes con ctrl + click)</label>
+                    <input type="file" class="form-control img" name="imgResponse" onchange="handleFileImages(this.files, 'previewImage')" multiple>
+                    <div id="previewImage" class="d-flex gap-2 flex-wrap py-3"></div>
+                </div>
+                <div class="form-check mb-3">
+                    <label class="form-check-label">
+                    <input class="form-check-input" type="checkbox" name="anonymous"> Responder de forma anónima
+                    </label>
+                </div>
+                <input type="hidden" name="id_opinion" value="'.$value['id'].'">
+
+                <input type="hidden" name="id" id="editResponseModal-id">
+
+                <div class="text-center">
+                    <button class="btn btn-primary mt-3" type="submit" data-bs-dismiss="modal">Editar opinión</button>
+                </div>
+            </form>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div> -->
+
+<!-- RESPONSE DELETE -->
+<!-- <div class="modal" id="deleteResponseModal">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title">¿Deseas eliminar la respuesta #<span id="deleteResponseModal-idText"></span>?</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+        <div class="modal-body">
+            <form method="post" id="deleteResponseModalForm">
+                <input type="hidden" name="id" id="deleteResponseModal-id">
+                <button type="submit" class="btn btn-danger" data-bs-dismiss="modal">Eliminar</button>
+            </form>
+        </div>
+
+    </div>
+  </div>
+</div> -->
+<?php } ?>

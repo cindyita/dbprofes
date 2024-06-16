@@ -12,7 +12,6 @@ $(function () {
         if (usernameValid) {
             sendAjaxForm(formData, 'UPDATE').then(
                 function (res) {
-                    console.log(res);
                     res = JSON.parse(res);
                     if (res == 1) {
                         message("Se ha actualizado tu perfil", "success");
