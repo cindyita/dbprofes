@@ -8,14 +8,23 @@ if (!empty(getView())) {
         case 'GET':
             getOpinion();
         break;
+        case 'GETRESPONSE':
+            getResponse();
+        break;
         case "POST":
             postOpinion();
         break;
         case 'DELETE':
             deleteOpinion();
         break;
+        case 'DELETERESPONSE':
+            deleteResponse();
+        break;
         case 'UPDATE':
             updateOpinion();
+        break;
+        case 'UPDATERESPONSE':
+            updateResponse();
         break;
         case 'LOADOPINIONS':
             loadOpinions();
@@ -56,6 +65,18 @@ function getOpinion(){
             LEFT JOIN POST_IMG img ON img.id_opinion_response = o.id AND img.type_opinion = 1
             WHERE o.id = :id",[':id'=>$id]);
     echo json_encode($opinion);
+}
+
+function getResponse(){
+    $data = getPostData();
+    $db = new QueryModel();
+    $id = $data['id'];
+    $responses = $db->queryUnique("SELECT r.*,img.img,img.num_img
+        FROM POST_RESPONSE r
+        LEFT JOIN POST_IMG img ON img.id_opinion_response = r.id AND img.type_opinion = 2
+        WHERE r.id = :id
+        ORDER BY r.id DESC",[':id'=>$id]);
+    echo json_encode($responses);
 }
 
 function postOpinion() {
@@ -118,6 +139,17 @@ function deleteOpinion(){
     }
 }
 
+function deleteResponse(){
+    $data = getPostData();
+    $db = new QueryModel();
+    $row = $db->query("DELETE FROM POST_RESPONSE WHERE id = :id",[":id"=>$data['id']]);
+    if($row == []){
+        echo 1;
+    }else{
+        echo json_encode($row);
+    }
+}
+
 function updateOpinion(){
     $data = getPostData();
     $db = new QueryModel();
@@ -131,7 +163,7 @@ function updateOpinion(){
 
     $fields = dataInQuery($data);
     
-    if($_FILES && $_FILES['images']){
+    if($_FILES && isset($_FILES['images'])){
         $numFiles = is_array($_FILES['images']['name']);
         $ruta = '../../../assets/img/posts/'.$id.'/';
         if (!file_exists($ruta)) {
@@ -176,6 +208,73 @@ function updateOpinion(){
     if (!empty($setParams)) {
         $setQuery = implode(', ', $setParams);
         $row = $db->query("UPDATE POST_OPINION SET $setQuery WHERE id=:id",$params);
+    }
+
+    if($row == []){
+        echo 1;
+    }else{
+        echo json_encode($row);
+    }
+}
+
+function updateResponse(){
+    $data = getPostData();
+    $db = new QueryModel();
+    $id = $data['id'];
+
+    if(isset($data['anonymous']) && $data['anonymous'] == "on"){
+        $data['anonymous'] = 1;
+    }else if(isset($data['anonymous'])){
+        $data['anonymous'] = 0;
+    }
+
+    $fields = dataInQuery($data);
+    
+    if($_FILES && isset($_FILES['images'])){
+        $numFiles = is_array($_FILES['images']['name']);
+        $ruta = '../../../assets/img/responses/'.$id.'/';
+        if (!file_exists($ruta)) {
+            mkdir($ruta, 0777, true);
+        }
+        $files = glob($ruta . '*');
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+        $imgs = "";
+        if($numFiles){
+            $img = createMultiFiles('images',$ruta,"",0);
+            $numImg = count($_FILES['images']['name']);
+            $img = call_user_func_array('array_merge', $img);
+            $imgs = implode(',', $img);
+        }else{
+            $img = createFile('images',$ruta,"",0);
+            $numImg = 1;
+            $img = call_user_func_array('array_merge', $img);
+            $imgs = $img;
+        }
+        if($img == 6){
+            echo 6;
+            return;
+        }
+        $fields['num_img'] = $numImg;
+        $db->query("DELETE FROM POST_IMG WHERE id_opinion_response = :id_opinion AND type_opinion = 2",[':id_opinion'=>$id]);
+        $db->query("INSERT INTO POST_IMG(img,type_opinion,id_opinion_response,num_img) VALUES(:img,2,:id_opinion,:num_img)",[":img"=>$imgs,":id_opinion"=>$id,":num_img"=>$numImg]);
+    }
+
+    $setParams = [];
+    $params = [":id"=>$id];
+    foreach ($fields as $key => $value) {
+        if ($value !== null) {
+            $setParams[] = "$key = :$key";
+            $params[":$key"] = $value;
+        }
+    }
+
+    if (!empty($setParams)) {
+        $setQuery = implode(', ', $setParams);
+        $row = $db->query("UPDATE POST_RESPONSE SET $setQuery WHERE id=:id",$params);
     }
 
     if($row == []){
@@ -438,8 +537,8 @@ function loadResponses(){
                                 <div class="dropdown">
                                     <button type="button" class="btn btn-muted-v2" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                                     <ul class="dropdown-menu dropdown-menu-end actions-opinion">
-                                        <li><a class="dropdown-item" onclick="editResponseModalText('.$value['id'].')" data-bs-toggle="modal" data-bs-target="#editResponseModal"><i class="fa-solid fa-pen"></i> Editar</a></li>
-                                        <li><a class="dropdown-item text-danger" onclick="deleteResponseModalText('.$value['id'].')" data-bs-toggle="modal" data-bs-target="#deleteResponseModal"><i class="fa-solid fa-trash text-danger"></i> Eliminar</a></li>
+                                        <li><a class="dropdown-item" onclick="editResponseModalText('.$value['id'].','.$value['id_opinion'].')" data-bs-toggle="modal" data-bs-target="#editResponseModal"><i class="fa-solid fa-pen"></i> Editar</a></li>
+                                        <li><a class="dropdown-item text-danger" onclick="deleteResponseModalText('.$value['id'].','.$value['id_opinion'].')" data-bs-toggle="modal" data-bs-target="#deleteResponseModal"><i class="fa-solid fa-trash text-danger"></i> Eliminar</a></li>
                                     </ul>
                                 </div>
                             </span>';

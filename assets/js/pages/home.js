@@ -8,8 +8,8 @@ const typesearchs = {
     "subject": "asignatura",
     "school": "escuela"
 };
-let images = {};
-let imagesRes = {};
+let imagesOpinion = {};
+let imagesResponse = {};
 
 $(function () {
     
@@ -28,7 +28,6 @@ $(function () {
         ],
         disableDragAndDrop: true
     });
-
 
     if (!isEmpty(queryParams)) {
         realodOpinions(1, false, queryParams['type'], queryParams['text']);
@@ -135,9 +134,8 @@ $(function () {
         var form = this;
         loadBtnForm(form);
         var formData = new FormData($("#editOpinionForm")[0]);
-        console.log(images);
-        for(var key in images) {
-            formData.append('images[]', images[key]);
+        for(var key in imagesOpinion) {
+            formData.append('images[]', imagesOpinion[key]);
         }
 
         sendAjaxForm(formData, 'UPDATE').then(
@@ -146,6 +144,50 @@ $(function () {
                 if (res == 1) {
                     message("Se actualizó la opinión", "success");
                     realodOpinions();
+                }
+                unLoadBtnForm(form);
+            }).catch(function (error) {
+                message("Algo salió mal", "error");
+                console.error(error);
+        });
+    });
+
+    $("#editResponseForm").on("submit", function (event) {
+        event.preventDefault();
+        var form = this;
+        var id_opinion = $("#editResponseModal-id_opinion").val();
+        loadBtnForm(form);
+        var formData = new FormData($("#editResponseForm")[0]);
+        for(var key in imagesResponse) {
+            formData.append('images[]', imagesResponse[key]);
+        }
+
+        sendAjaxForm(formData, 'UPDATERESPONSE').then(
+            function (res) {
+                console.log(res);
+                if (res == 1) {
+                    message("Se actualizó la respuesta", "success");
+                    showResponses(id_opinion);
+                }
+                unLoadBtnForm(form);
+            }).catch(function (error) {
+                message("Algo salió mal", "error");
+                console.error(error);
+        });
+    });
+
+    $("#deleteResponseModalForm").on("submit", function (event) {
+        event.preventDefault();
+        var form = this;
+        var id_opinion = $("#deleteResponseModal-id_opinion").val();
+        loadBtnForm(form);
+        var formData = new FormData($(this)[0]);
+        sendAjaxForm(formData, 'DELETERESPONSE').then(
+            function (res) {
+                if (res == 1) {
+                    message("Se eliminó la respuesta", "success");
+                    $("#numResponses" + id_opinion).text(parseInt($("#numResponses" + id_opinion).text()) -1);
+                    showResponses(id_opinion);
                 }
                 unLoadBtnForm(form);
             }).catch(function (error) {
@@ -193,8 +235,6 @@ function sendFormResponse(id,event) {
     });
 }
 
-
-
 function editOpinionModalText(id) {
     $("#editOpinionModal-idText").text(id);
     $("#editOpinionModal-id").val(id);
@@ -238,16 +278,16 @@ function deleteOpinionModalText(id) {
     $("#deleteOpinionModal-id").val(id);
 }
 
-function editResponseModalText(id) {
-    $("#editResponseModal-idText").text(id);
+function editResponseModalText(id,id_opinion) {
+    $("#editResponseModal-idText").text('#'+id_opinion+'#'+id);
     $("#editResponseModal-id").val(id);
-    sendAjax({id: id}, 'GET').then(
+    sendAjax({id: id}, 'GETRESPONSE').then(
         function (res) {
             var data = JSON.parse(res);
             $("#editResponseForm")[0].reset();
-            transposeData('editResponseModal', data, true);
-            $("#editResponseModal .note-placeholder").html("");
-            $("#editResponseModal .note-editable").html(data['Response']);
+            transposeData('editResponseModal', data, true,false);
+            // $("#editResponseModal .note-placeholder").html("");
+            // $("#editResponseModal .note-editable").html(data['Response']);
             if (data['anonymous'] == 1) {
                 $("#editResponseModal-anonymous").prop("checked", true);
             } else {
@@ -260,7 +300,7 @@ function editResponseModalText(id) {
                 var imgs = data['img'].split(",");
                 imgs.forEach(element => {
                     var img = $("<img />", {
-                        src: './assets/img/posts/' + data['id'] + '/' + element,
+                        src: './assets/img/responses/' + data['id'] + '/' + element,
                         class: "img-preview",
                         width: "120px"
                     });
@@ -276,7 +316,8 @@ function editResponseModalText(id) {
         });
 }
 
-function deleteResponseModalText(id) {
-    $("#deleteResponseModal-idText").text(id);
+function deleteResponseModalText(id,id_opinion) {
+    $("#deleteResponseModal-idText").text('#'+id_opinion+'#'+id);
     $("#deleteResponseModal-id").val(id);
+    $("#deleteResponseModal-id_opinion").val(id_opinion);
 }

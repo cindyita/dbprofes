@@ -164,7 +164,7 @@
     <div class="modal-content">
 
       <div class="modal-header">
-        <h4 class="modal-title">Editar opinión #<span id="editOpinionModal-text"></span></h4>
+        <h4 class="modal-title">Editar opinión #<span id="editOpinionModal-idText"></span></h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
@@ -214,7 +214,7 @@
                 </div>
                 <div class="mb-3 mt-3">
                     <label for="editOpinionModal-img" class="form-label">Resubir imagenes: (Selecciona varias imagenes con ctrl + click) (Si subes imagenes, se borrarán las anteriores).</label>
-                    <input type="file" class="form-control" name="editimg" id="editOpinionModal-img" onchange="handleFileImagesv2(this.files, 'editOpinionModal-preview')" multiple>
+                    <input type="file" class="form-control" name="editimg" id="editOpinionModal-img" onchange="handleFileImagesOpinion(this.files, 'editOpinionModal-preview')" multiple>
                     <div id="editOpinionModal-preview" class="d-flex gap-2 flex-wrap py-3"></div>
                 </div>
                 <div class="form-check mb-3">
@@ -257,38 +257,36 @@
     </div>
   </div>
 </div>
-
 <!-- RESPONSE EDIT -->
-<!-- <div class="modal" id="editResponseModal">
+<div class="modal" id="editResponseModal">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
 
       <div class="modal-header">
-        <h4 class="modal-title">Editar opinión #<span id="editResponseModal-text"></span></h4>
+        <h4 class="modal-title">Editar respuesta <span id="editResponseModal-idText"></span></h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
       <div class="modal-body">
 
         <div class="p-2 w-100 d-flex flex-column align-items-center gap-3">
-            <form method="post" id="responseForm'.$value['id'].'" class="responseForm" autocomplete="off" enctype="multipart/form-data" data-id="'.$value['id'].'">
+            <form method="post" id="editResponseForm" class="responseForm w-100" autocomplete="off" enctype="multipart/form-data">
                 <div class="mb-3 mt-3">
                     <label for="comment" class="mb-2">Respuesta:</label>
-                    <textarea class="form-control" rows="8" name="opinion" placeholder="Respuesta a la opinión.."></textarea>
+                    <textarea class="form-control" rows="8" name="opinion" placeholder="Respuesta a la opinión.." id="editResponseModal-opinion"></textarea>
                 </div>
                 <div class="mb-3 mt-3">
                     <label for="img" class="form-label">Imagenes: (Selecciona varias imagenes con ctrl + click)</label>
-                    <input type="file" class="form-control img" name="imgResponse" onchange="handleFileImages(this.files, 'previewImage')" multiple>
-                    <div id="previewImage" class="d-flex gap-2 flex-wrap py-3"></div>
+                    <input type="file" class="form-control img" name="editResponseModal-img" id="editResponseModal-img" onchange="handleFileImagesResponse(this.files, 'editResponseModal-preview')" multiple>
+                    <div id="editResponseModal-preview" class="d-flex gap-2 flex-wrap py-3"></div>
                 </div>
                 <div class="form-check mb-3">
                     <label class="form-check-label">
-                    <input class="form-check-input" type="checkbox" name="anonymous"> Responder de forma anónima
+                    <input class="form-check-input" type="checkbox" name="anonymous" id="editResponseModal-anonymous"> Responder de forma anónima
                     </label>
                 </div>
-                <input type="hidden" name="id_opinion" value="'.$value['id'].'">
-
                 <input type="hidden" name="id" id="editResponseModal-id">
+                <input type="hidden" id="editResponseModal-id_opinion">
 
                 <div class="text-center">
                     <button class="btn btn-primary mt-3" type="submit" data-bs-dismiss="modal">Editar opinión</button>
@@ -300,26 +298,27 @@
 
     </div>
   </div>
-</div> -->
+</div>
 
 <!-- RESPONSE DELETE -->
-<!-- <div class="modal" id="deleteResponseModal">
+<div class="modal" id="deleteResponseModal">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
 
       <div class="modal-header">
-        <h4 class="modal-title">¿Deseas eliminar la respuesta #<span id="deleteResponseModal-idText"></span>?</h4>
+        <h4 class="modal-title">¿Deseas eliminar la respuesta <span id="deleteResponseModal-idText"></span>?</h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
         <div class="modal-body">
             <form method="post" id="deleteResponseModalForm">
                 <input type="hidden" name="id" id="deleteResponseModal-id">
+                <input type="hidden" id="deleteResponseModal-id_opinion">
                 <button type="submit" class="btn btn-danger" data-bs-dismiss="modal">Eliminar</button>
             </form>
         </div>
 
     </div>
   </div>
-</div> -->
+</div>
 <?php } ?>

@@ -211,7 +211,8 @@ function copyToClipboard(text) {
  * the ID of an element in the HTML document, and the corresponding value represents the data that
  * should be assigned to that element.
  */
-function transposeData(modalid, data, idModalInInput = false) {
+function transposeData(modalid, data, idModalInInput = false, idText = true) {
+  console.log("Se han transpasado los datos al formulario");
     for (const key in data) {
         if (data.hasOwnProperty(key)) {
             const value = data[key];
@@ -223,16 +224,18 @@ function transposeData(modalid, data, idModalInInput = false) {
             if (element.length > 0) {
                 if (element.attr('type') !== 'file') {
                     if (element.is("input") || element.is("select") || element.is("textarea")) {
-                        element.val(value);
+                      element.val(value);
                     } else {
                         element.html(value);
                     }
                 }
             }
-            
-            if (key == 'id' && $("#" + modalid + "-" + key + "Text").length > 0) {
+            if (idText) {
+              if (key == 'id' && $("#" + modalid + "-" + key + "Text").length > 0) {
                 $("#" + modalid + "-" + key + "Text").html(value);
+              }
             }
+            
         }
     }
 }
@@ -307,7 +310,7 @@ function handleFileImages(files, previewId) {
     });
 }
 
-function handleFileImagesv2(files, previewId) {
+function handleFileImagesOpinion(files, previewId) {
     const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff"];
     var previewContainer = $("#" + previewId);
     previewContainer.empty();
@@ -319,7 +322,38 @@ function handleFileImagesv2(files, previewId) {
             return;
         }
 
-        images[file.name] = file;
+        imagesOpinion[file.name] = file;
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var img = $("<img />", {
+                src: e.target.result,
+                class: "img-preview",
+                width: "120px"
+            });
+            var imgContainer = $("<div></div>", {
+                class: "img-container"
+            });
+            imgContainer.append(img);
+            previewContainer.append(imgContainer);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function handleFileImagesResponse(files, previewId) {
+    const allowedExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff"];
+    var previewContainer = $("#" + previewId);
+    previewContainer.empty();
+
+    Array.from(files).forEach(file => {
+        var fileExtension = file.name.split(".").pop().toLowerCase();
+        if (allowedExtensions.indexOf(fileExtension) === -1) {
+            alert("El archivo '" + file.name + "' tiene una extensión no permitida");
+            return;
+        }
+
+        imagesResponse[file.name] = file;
 
         var reader = new FileReader();
         reader.onload = function (e) {
