@@ -338,6 +338,7 @@ function dateFormatAll() {
 }
 //------------------OPINIONS------------------------
 async function realodOpinions(type = 1, append = false, typesearch = "", textsearch = "") {
+
     $("#btn-show-more").hide();
     if (!append) {
         $("#show-opinions").html('<div class="spinner-border text-muted"></div>');
@@ -348,13 +349,15 @@ async function realodOpinions(type = 1, append = false, typesearch = "", textsea
 
     try {
       var res = await sendAjax({ type: type, limit: limit, offset: currentOffset, typesearch: typesearch, textsearch: textsearch }, 'LOADOPINIONS');
+      
         if (res == 4) {
             message("La búsqueda tiene carácteres inválidos", "error");
             $("#show-opinions").html("<span class='text-muted text-center'>Error en la búsqueda</span>");
             $("#search-form")[0].reset();
             return false;
         }
-        const opinions = JSON.parse(res);
+      const opinions = JSON.parse(res);
+      
         if (opinions != "") {
             console.log("Se han cargado las opiniones");
             if (append) {
