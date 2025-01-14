@@ -97,7 +97,6 @@ class QueryModel {
             return false;
         }
     }
-
         
     public function insert($table, $data) {
         $sanitizedData = $this->sanitizeData($data);
