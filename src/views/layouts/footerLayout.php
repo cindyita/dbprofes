@@ -2,7 +2,7 @@
 
 <div class="p-3 mt-5 text-center">
     <hr>
-    @ DBprofes v0.1 BETA
+    <div>@DBprofes v0.2.1 BETA<a target="_blank" class="dropdown-item" href="https://github.com/cindyita/dbprofes"><i class="fa-brands fa-github"></i></a></div>
 </div>
 
 <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
