@@ -52,7 +52,7 @@ composer install
 # Configuraremos nuestro .env y la base de datos local
 
 > [!NOTE]
-> Tendremos que remover el .example del archivo llamado .env.example y .env.local.example para que queden como: .env y .env.local
+> Tendremos que clonar los archivos .env.example y .env.local.example y remover el .example de los archivos clonados para que queden como: .env y .env.local (No borres los originales)
 
 Configuraremos nuestra base de datos local en el archivo .env.local
 
